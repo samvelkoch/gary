@@ -20,7 +20,7 @@ CONTENT_FR = {"NOUN", "VERB", "ADJ", "ADV"}
 # служебные слова, которые морфология относит к знаменательным частям речи
 STOP_RU = set("""быть мочь который мой твой наш ваш свой этот тот весь такой какой самый сам один потому так там тут здесь
 теперь уже ещё очень только даже тоже вот как где когда сейчас всегда никогда почему зачем тогда потом затем сразу вдруг
-просто совсем ничто никто что кто себя свой каждый любой другой иной весьма столь стать иметь сказать""".split())
+просто совсем ничто никто что кто себя свой каждый любой другой иной весьма столь стать иметь сказать есть бывать""".split())
 STOP_FR = set("être avoir faire pouvoir aller dire vouloir falloir devoir tout même autre plus très bien aussi encore jamais toujours alors donc ainsi là ici".split())
 WORD_RU = re.compile(r"[А-Яа-яЁё]+(?:-[А-Яа-яЁё]+)*")
 
@@ -86,6 +86,9 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--qa", action="store_true"); A = ap.parse_args()
     docs = pickle.load(open(HERE / "corpus.pkl", "rb"))
     V = json.load(open(HERE / "voices.json"))
+    import csv
+    global MAN_COUNTS
+    MAN_COUNTS = dict(Counter(r["role"] for r in csv.DictReader(open(HERE.parent / "texts" / "manifest.csv", encoding="utf-8"))))
     LOWER = {lg: {t for d in docs if d["lang"] == lg for t in d["tokens"] if t[:1].islower()} for lg in ("ru", "fr")}
 
     # имя: морфология, или слово ни разу не встречено со строчной, или лемма с заглавной в ≥ 70% употреблений (≥ 2 раз)
@@ -296,9 +299,9 @@ def main():
                 lexc[key][p] += 1
             lex_sign[key][SIGN_RU[d["sign"]]] += 1
             lex_book[key][ru_atlas_ix[d["id"]]] += 1
-    keys = [k for k, n in lex_total.items() if n >= 8]
+    keys = [k for k, n in lex_total.items() if n >= 10]
     # примеры: первое предложение средней длины со словом (для слов ≥ 15 употреблений)
-    need = {k for k in keys if lex_total[k] >= 25}
+    need = {k for k in keys if lex_total[k] >= 40}
     for d in ru:
         if not need:
             break
@@ -317,12 +320,12 @@ def main():
                         continue
                     k = spell("ru", lm) if (t[:1].isupper() and (lw not in LOWER["ru"] or lm in NAME_LEM["ru"])) else lm
                     if k in need and k not in lex_ex:
-                        lex_ex[k] = [s[:220], ru_atlas_ix[d["id"]]]
+                        lex_ex[k] = [s[:170], ru_atlas_ix[d["id"]]]
                         need.discard(k)
     lex = {}
     for k in keys:
         lex[k] = [lex_total[k], lexc[k], [lex_sign[k].get(s, 0) for s in ("Гари", "Ажар", "Шатан Богат")],
-                  [[b, n] for b, n in lex_book[k].most_common(4)], lex_ex.get(k)]
+                  [x for b, n in lex_book[k].most_common() for x in (b, n)], lex_ex.get(k)]
     sign_tokens = {s: sum(len(d["tokens"]) for d in v) for s, v in sign_groups.items()}
 
     # ---------- хронология ----------
@@ -388,7 +391,7 @@ def main():
     myths.append({"id": "sini", "q": "Фоско Синибальди — ещё одна маска со своим голосом",
                   "v": {"differs": "yes", "within": "no", "border": "part", "unstable": "no"}[vs_],
                   "num": f"«Человек с голубкой» отстоит от романов Гари на {M200['sini_gary']:.2f} — это не дальше, чем романы Гари друг от друга ({M200['base'][0]:.2f}). "
-                         f"По частым словам под этой маской пишет сам Гари."})
+                         f"По частым словам под этой маской Гари от самого себя не отличить."})
     pj = V["fr"]["projection"]["oral"]["to_book"]
     near_oral = min(pj, key=pj.get)
     myths.append({"id": "oral", "q": "В интервью Гари говорит языком «Обещания на рассвете»",
@@ -527,7 +530,8 @@ def main():
                      "works": len(works), "translators": len({t.strip() for d in ru if d["tr"] and d["tr"] != "нет данных" for t in d["tr"].split(",")}),
                      "signs": sorted({SIGN_RU[d["sign"]] for d in ru + fr}),
                      "ru_by_sign": {SIGN_RU[s]: sum(len(d["tokens"]) for d in ru if d["sign"] == s) for s in {d["sign"] for d in ru}},
-                     "ru_by_genre": dict(Counter(d["genre"] for d in ru)), "mattr_ru": mattr([t for d in ru for t in d["tokens"]])},
+                     "ru_by_genre": dict(Counter(d["genre"] for d in ru)), "mattr_ru": mattr([t for d in ru for t in d["tokens"]]),
+                     "files": MAN_COUNTS},
         "atlas": atlas, "works": works, "eras": eras, "ajar_words": [[w, round(z, 1), a, b] for w, z, a, b in ajar_words],
         "gary_words": [[w, round(z, 1), a, b] for w, z, a, b in gary_words],
         "top_words": top_words, "fields": {"names": list(FIELDS), "per": fields_per, "sign": fields_sign, "words": fields_words, "lead": fields_lead},
@@ -555,6 +559,7 @@ def main():
 
 
 ru_parse_cache = {}
+MAN_COUNTS = {}
 if __name__ == "__main__":
     # кеш лемм по словоформе для примеров словоискателя
     import pymorphy3

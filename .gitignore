@@ -14,6 +14,7 @@ analysis/*.npz
 *.html
 !analysis/*.template.html
 !analysis/report*.head.html
+!analysis/report.body.html
 !docs/*.html
 
 # ── окружения, кэш, служебное ──

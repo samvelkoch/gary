@@ -1,0 +1,307 @@
+<style>
+/* дополнения к оформлению «на просвет» для прозы и голосов */
+.sheets{position:relative; width:100%; margin-top:6px}
+.sheets canvas{display:block; cursor:pointer; touch-action:manipulation}
+.legend-h{display:flex; flex-wrap:wrap; gap:6px 18px; font-family:var(--f-mono); font-size:12px; color:var(--hlabel); margin:12px 0 0}
+.legend-h i{display:inline-block; width:12px; height:12px; border-radius:2px; margin-right:6px; vertical-align:-1px}
+.vs{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px; margin:14px 0}
+.vs .box{background:var(--surface); border:1px solid var(--ring); padding:14px 16px; box-shadow:0 12px 24px -20px rgba(33,27,22,.4)}
+.vs .box h3{font-family:var(--f-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:500; margin:0 0 8px}
+.vs .big{font-family:var(--f-mono); font-weight:500; font-size:30px; line-height:1.1; letter-spacing:-.03em}
+.vs .sub{font-size:14.5px; color:var(--ink-2); margin-top:6px; line-height:1.45}
+.qa{display:grid; gap:10px; margin:10px 0 0}
+.qa p{margin:0; font-size:15.5px}
+.qa .who{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-right:8px}
+.pair2{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:14px; margin-top:10px}
+.pair2 blockquote{margin:0}
+.cmp{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:14.5px}
+.cmp th,.cmp td{padding:6px 10px; border-bottom:1px solid var(--grid); text-align:right; white-space:nowrap}
+.cmp th:first-child,.cmp td:first-child{text-align:left; white-space:normal}
+.cmp th{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); font-weight:400}
+.cmp td b{font-family:var(--f-mono); font-weight:500}
+.tagl{display:inline-block; font-family:var(--f-mono); font-size:11px; letter-spacing:.06em; padding:1px 6px; border-radius:2px; color:var(--surface); vertical-align:1px}
+.note{font-size:14.5px; color:var(--ink-2); max-width:70ch}
+.warnbox{border-left:3px solid var(--warn); padding:6px 0 6px 14px; margin:14px 0; font-size:15px; color:var(--ink-2); max-width:72ch}
+.wmap-note{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); margin:6px 0 0}
+</style>
+
+<div id="tip" role="tooltip" hidden></div>
+<div class="bar"><div class="inner"><div class="brand">Ромен Гари<i>_</i> на просвет</div><nav class="tabs" aria-label="Части"><button type="button" data-part="part-obzor" aria-current="true"><small>I</small>Обзор</button><button type="button" data-part="part-proza" aria-current="false"><small>II</small>Проза</button><button type="button" data-part="part-slova" aria-current="false"><small>III</small>Слова</button><button type="button" data-part="part-golosa" aria-current="false"><small>IV</small>Голоса</button><button type="button" data-part="part-mir" aria-current="false"><small>V</small>Мир Гари</button><button type="button" data-part="part-perevod" aria-current="false"><small>VI</small>Оригинал и перевод</button><button type="button" data-part="part-konec" aria-current="false"><small>VII</small>Рекорды и методика</button></nav></div></div>
+<header class="hero" id="top">
+  <div class="inner">
+    <div class="eyebrow">Романы, рассказы и интервью, 1937–1980 · частотный и стилевой анализ</div>
+    <h1><span class="typed">Ромен Гари</span><span class="hand">на просвет</span></h1>
+    <p class="lede" id="lede"></p>
+    <div class="tools">
+      <label for="hl-input">Подсветить слово в книгах</label>
+      <input type="search" id="hl-input" placeholder="например, слон" autocomplete="off" spellcheck="false">
+      <div class="chips" id="hl-chips"></div>
+      <span class="count" id="hl-count" aria-live="polite"></span>
+    </div>
+    <div class="sheets" id="sheets"><canvas id="sheets-cv" role="img" aria-label="Все книги Гари в русском переводе и во французском оригинале по годам: каждая книга изображена листом, каждый абзац — штрихом длиной в число слов"></canvas></div>
+    <div class="legend-h" id="sheets-legend"></div>
+    <p class="pages-note">Каждый лист — книга, каждый штрих — абзац: чем длиннее штрих, тем больше в абзаце слов. Красные штрихи — реплики диалога, светлые — повествование. Цветная полоска над листом — подпись, под которой книга вышла. Листы идут по годам. Нажмите на лист, чтобы открыть карточку книги в атласе.</p>
+    <div class="figures" id="figures"></div>
+  </div>
+</header>
+<div class="inner"><div class="layout">
+<nav class="rail" aria-label="Разделы"><div class="g">I · Обзор</div><a href="#glavnoe"><span>I.1</span>Главное коротко</a><a href="#mify"><span>I.2</span>Мифы и факты</a><a href="#hronologia"><span>I.3</span>Хронология</a><div class="g">II · Проза</div><a href="#fraza"><span>II.1</span>Фраза</a><a href="#dialog"><span>II.2</span>Диалог</a><a href="#ya"><span>II.3</span>Кто рассказывает</a><a href="#znaki"><span>II.4</span>Знаки</a><a href="#atlas"><span>II.5</span>Атлас книг</a><div class="g">III · Слова</div><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#epohi"><span>III.3</span>Слова эпох</a><a href="#temy"><span>III.4</span>Темы</a><a href="#gari-azhar"><span>III.5</span>Словарь Ажара</a><div class="g">IV · Голоса</div><a href="#golosa"><span>IV.1</span>Гари, Ажар, Синибальди</a><a href="#shum"><span>IV.2</span>Голос или переводчик</a><a href="#noch"><span>IV.3</span>«Ночь будет спокойной»</a><a href="#ustno"><span>IV.4</span>Гари вслух</a><div class="g">V · Мир Гари</div><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#mesta"><span>V.2</span>Места</a><a href="#zveri"><span>V.3</span>Звери</a><a href="#polki"><span>V.4</span>Напитки, транспорт, оружие</a><div class="g">VI · Оригинал и перевод</div><a href="#original"><span>VI.1</span>Три книги на двух языках</a><a href="#dva"><span>VI.2</span>Два перевода одной книги</a><div class="g">VII · Рекорды и методика</div><a href="#rekordy"><span>VII.1</span>Рекорды</a><a href="#korpus"><span>VII.2</span>Корпус</a><a href="#metod"><span>VII.3</span>Методика</a></nav>
+<div class="content">
+
+<div class="part" id="part-obzor">
+<div class="part-head"><div class="n">Часть I</div><h1>Обзор</h1><p class="lead">Что вошло в корпус, как книги распределены по годам и что о Гари принято говорить.</p><div class="ch-links"><a href="#glavnoe"><span>I.1</span>Главное коротко</a><a href="#mify"><span>I.2</span>Мифы и факты</a><a href="#hronologia"><span>I.3</span>Хронология</a></div></div>
+<section id="glavnoe">
+  <div class="kick"><b>I.1</b><span>Обзор</span></div>
+  <h2>Главное коротко</h2>
+  <div class="find" id="findings"></div>
+</section>
+<section id="mify">
+  <div class="kick"><b>I.2</b><span>Обзор</span></div>
+  <h2>Мифы и факты</h2>
+  <p>О Гари часто повторяют одни и те же вещи. Вот что из этого видно в цифрах. Вердикт выбирается порогом, который задан до подсчёта, и касается только измеримой стороны утверждения.</p>
+  <div class="myth" id="myths"></div>
+</section>
+<section id="hronologia">
+  <div class="kick"><b>I.3</b><span>Обзор</span></div>
+  <h2>Хронология</h2>
+  <p id="t-chrono"></p>
+  <div class="panel"><div class="cap"><span class="t">Книги по годам первой публикации</span><span class="u">высота — число слов в русском переводе или во французском оригинале</span></div>
+    <div class="legend" id="lg-chrono"></div>
+    <div class="chart" id="c-chrono"></div></div>
+  <div class="grid2">
+    <div class="panel"><div class="cap"><span class="t">Из чего состоит корпус</span><span class="u">тыс. слов</span></div>
+      <div class="chart" id="c-corpus"></div></div>
+    <div class="panel"><div class="cap"><span class="t">Русские переводы по подписи</span><span class="u">тыс. слов</span></div>
+      <div class="chart" id="c-signs"></div></div>
+  </div>
+</section>
+</div>
+
+<div class="part" id="part-proza">
+<div class="part-head"><div class="n">Часть II</div><h1>Проза</h1><p class="lead">Как устроены книги: длина фразы, доля разговора, кто рассказывает, какие знаки ставит автор. Числа по русским переводам отражают и переводчика — рядом всегда показано, кто переводил.</p><div class="ch-links"><a href="#fraza"><span>II.1</span>Фраза</a><a href="#dialog"><span>II.2</span>Диалог</a><a href="#ya"><span>II.3</span>Кто рассказывает</a><a href="#znaki"><span>II.4</span>Знаки</a><a href="#atlas"><span>II.5</span>Атлас книг</a></div></div>
+<section id="fraza">
+  <div class="kick"><b>II.1</b><span>Проза</span></div>
+  <h2>Фраза</h2>
+  <p class="finding" id="f-fraza"></p>
+  <p>Типичная фраза — медиана: половина фраз книги короче, половина длиннее. Отрезок — от четверти до трёх четвертей фраз. Точка — книга, цвет — подпись.</p>
+  <div class="panel"><div class="cap"><span class="t">Слов в типичной фразе, по книгам</span><span class="u" id="u-fraza"></span></div>
+    <div class="ctrl"><span class="lab">Язык</span><div id="sl-lang"></div></div>
+    <div class="chart" id="c-fraza"></div></div>
+</section>
+<section id="dialog">
+  <div class="kick"><b>II.2</b><span>Проза</span></div>
+  <h2>Диалог</h2>
+  <p class="finding" id="f-dialog"></p>
+  <div class="panel"><div class="cap"><span class="t">Доля слов в абзацах-репликах</span><span class="u">% слов книги в абзацах, которые начинаются с тире; книги больше 10 тыс. слов</span></div>
+    <div class="chart" id="c-dialog"></div></div>
+</section>
+<section id="ya">
+  <div class="kick"><b>II.3</b><span>Проза</span></div>
+  <h2>Кто рассказывает</h2>
+  <p class="finding" id="f-ya"></p>
+  <p>Мера — сколько раз на тысячу слов встречаются «я», «меня», «мой» и другие формы первого лица. Высокое значение — рассказ от первого лица, низкое — рассказ со стороны.</p>
+  <div class="panel"><div class="cap"><span class="t">«Я» на 1000 слов</span><span class="u">книги больше 10 тыс. слов, по годам</span></div>
+    <div class="chart" id="c-ya"></div></div>
+</section>
+<section id="znaki">
+  <div class="kick"><b>II.4</b><span>Проза</span></div>
+  <h2>Знаки</h2>
+  <p class="finding" id="f-znaki"></p>
+  <div class="panel"><div class="cap"><span class="t">Знаки на 1000 слов</span><span class="u">выберите знак</span></div>
+    <div class="ctrl"><span class="lab">Знак</span><div id="pm-seg"></div></div>
+    <div class="chart" id="c-znaki"></div></div>
+</section>
+<section id="atlas">
+  <div class="kick"><b>II.5</b><span>Проза</span></div>
+  <h2>Атлас книг</h2>
+  <p>Все книги корпуса: русские переводы, французские оригиналы и книги «Гари о себе». Выберите книгу в списке или на листах шапки. В карточке — меры, строение книги по абзацам, характерные слова, главные имена, первая и последняя фразы.</p>
+  <div class="atlas">
+    <div class="panel" style="margin:0"><div class="cap"><span class="t">Книги</span><span class="u">нажмите на строку</span></div>
+      <div class="ctrl"><span class="lab">Порядок</span><div id="at-sort"></div></div>
+      <div class="chart" id="c-atlas"></div></div>
+    <div class="card" id="card"></div>
+  </div>
+</section>
+</div>
+
+<div class="part" id="part-slova">
+<div class="part-head"><div class="n">Часть III</div><h1>Слова</h1><p class="lead">Какие слова у Гари самые частые, как словарь меняется по годам, какие темы держатся всю жизнь и чем словарь Ажара отличается от словаря Гари.</p><div class="ch-links"><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#epohi"><span>III.3</span>Слова эпох</a><a href="#temy"><span>III.4</span>Темы</a><a href="#gari-azhar"><span>III.5</span>Словарь Ажара</a></div></div>
+<section id="slovar">
+  <div class="kick"><b>III.1</b><span>Слова</span></div>
+  <h2>Частые слова</h2>
+  <p>Слово считается во всех формах: «слон», «слона», «слонов» — одно слово. Имена и служебные слова исключены.</p>
+  <div class="panel"><div class="cap"><span class="t">Самые частые слова</span><span class="u">на 10 000 слов</span></div>
+    <div class="ctrl"><span class="lab">Язык</span><div id="tw-lang"></div><span class="lab">Часть речи</span><div id="tw-pos"></div></div>
+    <div class="chart" id="c-top"></div></div>
+</section>
+<section id="poisk">
+  <div class="kick"><b>III.2</b><span>Слова</span></div>
+  <h2>Словоискатель</h2>
+  <p>Любое слово, которое встречается в русских переводах не меньше 10 раз: сколько раз и в каких книгах, как часто по периодам и под какой подписью, и пример. Имена тоже можно искать: «Морель», «Роза», «Момо».</p>
+  <div class="xw">
+    <div class="panel" style="margin:0">
+      <div class="ctrl"><label class="lab" for="x-input">Слово</label><input type="search" id="x-input" placeholder="слон, мать, клоун…" autocomplete="off" spellcheck="false"></div>
+      <div class="chips" id="x-sug"></div>
+      <div id="x-out"></div>
+    </div>
+    <div class="panel" style="margin:0"><div class="cap"><span class="t" id="x-t2">Где встречается</span><span class="u">раз в книге</span></div>
+      <div class="chart" id="c-xbooks"></div></div>
+  </div>
+</section>
+<section id="epohi">
+  <div class="kick"><b>III.3</b><span>Слова</span></div>
+  <h2>Слова эпох</h2>
+  <p>Для каждого периода — слова, которые в нём встречаются заметно чаще, чем в остальные годы. Слово засчитывается, только если оно есть хотя бы в двух книгах периода, иначе это слово одной книги. Число в скобках — в скольких книгах периода встречается слово.</p>
+  <div class="grid2" id="eras" style="gap:16px"></div>
+</section>
+<section id="temy">
+  <div class="kick"><b>III.4</b><span>Слова</span></div>
+  <h2>Темы</h2>
+  <p class="finding" id="f-temy"></p>
+  <p>Шестнадцать тем, в каждой 12–20 слов, темы не пересекаются. Число — сколько слов темы приходится на тысячу слов текста. Нажмите на тему, чтобы увидеть её слова и книгу, где тема звучит громче всего.</p>
+  <div class="panel"><div class="cap"><span class="t">Темы по периодам и подписям</span><span class="u">на 1000 слов</span></div>
+    <div class="ctrl"><span class="lab">Показать</span><div id="fl-mode"></div></div>
+    <div class="chart" id="c-fields"></div>
+    <div id="fl-drill" class="note" style="margin-top:12px"></div></div>
+</section>
+<section id="gari-azhar">
+  <div class="kick"><b>III.5</b><span>Слова</span></div>
+  <h2>Словарь Ажара</h2>
+  <p>Слова, которые в четырёх книгах Ажара встречаются заметно чаще, чем в книгах Гари, и наоборот. Это сравнение русских переводов, поэтому оно говорит о темах и героях, а не о голосе: голос сравнивается по оригиналам в части IV.</p>
+  <div class="grid2">
+    <div class="panel"><div class="cap"><span class="t">Чаще у Ажара</span><span class="u">сила отличия</span></div><div class="chart" id="c-aw"></div></div>
+    <div class="panel"><div class="cap"><span class="t">Чаще у Гари</span><span class="u">сила отличия</span></div><div class="chart" id="c-gw"></div></div>
+  </div>
+</section>
+</div>
+
+<div class="part" id="part-golosa">
+<div class="part-head"><div class="n">Часть IV</div><h1>Голоса</h1><p class="lead">Гари печатался под четырьмя именами. Можно ли по тексту отличить Ажара и Синибальди от Гари — и где кончается голос автора и начинается голос переводчика.</p><div class="ch-links"><a href="#golosa"><span>IV.1</span>Гари, Ажар, Синибальди</a><a href="#shum"><span>IV.2</span>Голос или переводчик</a><a href="#noch"><span>IV.3</span>«Ночь будет спокойной»</a><a href="#ustno"><span>IV.4</span>Гари вслух</a></div></div>
+<section id="golosa">
+  <div class="kick"><b>IV.1</b><span>Голоса</span></div>
+  <h2>Гари, Ажар, Синибальди <span class="tag">по оригиналам</span></h2>
+  <p class="finding" id="f-golosa"></p>
+  <p>Как это считается. Каждая книга режется на куски по 3000 слов повествования (реплики героев не берутся — это голоса персонажей). Для каждого куска считается, как часто в нём встречаются 200 самых частых слов языка: «de», «la», «que», «il», «je»… Автор выбирает такие слова не задумываясь, поэтому по ним узнают почерк. Расстояние между кусками — среднее различие этих частот (дельта Барроуза): чем больше, тем дальше тексты друг от друга.</p>
+  <div class="panel"><div class="cap"><span class="t">Карта кусков текста</span><span class="u">каждая точка — 3000 слов; близкие по частым словам куски лежат рядом</span></div>
+    <div class="legend" id="lg-map"></div>
+    <div class="chart" id="c-map"></div>
+    <p class="wmap-note" id="n-map"></p></div>
+  <div class="panel"><div class="cap"><span class="t">Расстояние от книги до романов Гари</span><span class="u">дельта; пунктир — расстояние между двумя романами Гари</span></div>
+    <div class="ctrl"><span class="lab">Вариант</span><div id="gv-var"></div><span class="lab">Частых слов</span><div id="gv-mfw"></div></div>
+    <div class="chart" id="c-gdist"></div>
+    <p class="note" id="n-gdist"></p></div>
+</section>
+<section id="shum">
+  <div class="kick"><b>IV.2</b><span>Голоса</span></div>
+  <h2>Голос или переводчик <span class="tag">по переводам</span></h2>
+  <p class="finding" id="f-shum"></p>
+  <p>Русских книг Гари много, но их переводили больше десяти человек. Чтобы понять, сколько «почерка» вносит переводчик, берутся четыре книги, у которых есть два разных перевода. Расстояние между двумя переводами одной книги — это шум перевода: автор тот же, текст тот же, разные только переводчики.</p>
+  <div class="panel"><div class="cap"><span class="t">Расстояния между русскими книгами</span><span class="u">дельта по 200 частым словам, куски по 5000 слов повествования</span></div>
+    <div class="chart" id="c-shum"></div>
+    <p class="note" id="n-shum"></p></div>
+  <div class="warnbox" id="w-check"></div>
+  <div class="panel"><div class="cap"><span class="t">Переводчик или годы</span><span class="u">каждая точка — пара книг Гари; по горизонтали — сколько лет между ними</span></div>
+    <div class="legend" id="lg-pairs"></div>
+    <div class="chart" id="c-pairs"></div>
+    <p class="note" id="n-pairs"></p></div>
+</section>
+<section id="noch">
+  <div class="kick"><b>IV.3</b><span>Голоса</span></div>
+  <h2>«Ночь будет спокойной»</h2>
+  <p class="finding" id="f-noch"></p>
+  <p>Книга-интервью 1974 года: Гари отвечает на вопросы своего лицейского друга Франсуа Бонди. В тексте реплики размечены именами, поэтому вопросы и ответы можно посчитать отдельно.</p>
+  <div class="vs" id="noch-vs"></div>
+  <div class="panel"><div class="cap"><span class="t">Книга как лента реплик</span><span class="u">ширина реплики — число слов; вверху вопросы Бонди, внизу ответы Гари</span></div>
+    <div class="chart" id="c-noch"></div></div>
+  <div class="panel"><div class="cap"><span class="t">Короткие вопросы Бонди</span><span class="u">примеры из книги</span></div><div class="qa" id="noch-q"></div></div>
+</section>
+<section id="ustno">
+  <div class="kick"><b>IV.4</b><span>Голоса</span></div>
+  <h2>Гари вслух</h2>
+  <p class="finding" id="f-ustno"></p>
+  <p>Две радиопередачи — «Радиоскопия» Жака Шанселя (1975) и «Propos et confidences» Радио-Канады (1980) — есть в автоматических субтитрах: без знаков препинания, с ошибками распознавания. Поэтому с ними считаются только частые слова. Расстояние от устной речи до каждой книги посчитано в той же системе, что и карта выше.</p>
+  <div class="panel"><div class="cap"><span class="t">Расстояние от устной речи до книг</span><span class="u">дельта; меньше — ближе</span></div>
+    <div class="chart" id="c-ustno"></div></div>
+</section>
+</div>
+
+<div class="part" id="part-mir">
+<div class="part-head"><div class="n">Часть V</div><h1>Мир Гари</h1><p class="lead">Кого Гари упоминает из книги в книгу, где происходит действие, какие звери, напитки, машины и ружья населяют его романы.</p><div class="ch-links"><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#mesta"><span>V.2</span>Места</a><a href="#zveri"><span>V.3</span>Звери</a><a href="#polki"><span>V.4</span>Напитки, транспорт, оружие</a></div></div>
+<section id="panteon">
+  <div class="kick"><b>V.1</b><span>Мир Гари</span></div>
+  <h2>Пантеон</h2>
+  <p class="finding" id="f-panteon"></p>
+  <p>Реальные люди, которых Гари называет по фамилии хотя бы в четырёх книгах. Рейтинг — по числу книг, а не упоминаний: иначе впереди был бы герой одного романа. Нажмите на имя, чтобы увидеть книги.</p>
+  <div class="wd-grid">
+    <div class="panel" style="margin:0"><div class="chart" id="c-panteon"></div></div>
+    <div class="card" id="pn-card"></div>
+  </div>
+</section>
+<section id="mesta">
+  <div class="kick"><b>V.2</b><span>Мир Гари</span></div>
+  <h2>Места</h2>
+  <p class="finding" id="f-mesta"></p>
+  <div class="wd-grid">
+    <div class="panel" style="margin:0"><div class="cap"><span class="t">Места, названные хотя бы в трёх книгах</span><span class="u">число книг</span></div><div class="chart" id="c-mesta"></div></div>
+    <div class="card" id="ms-card"></div>
+  </div>
+</section>
+<section id="zveri">
+  <div class="kick"><b>V.3</b><span>Мир Гари</span></div>
+  <h2>Звери</h2>
+  <p class="finding" id="f-zveri"></p>
+  <div class="shelf">
+    <div class="panel" style="margin:0"><div class="cap"><span class="t">Звери и птицы</span><span class="u">упоминаний; нажмите на зверя</span></div><div class="chart" id="c-zveri"></div></div>
+    <div class="card shelf-card" id="zv-card"></div>
+  </div>
+</section>
+<section id="polki">
+  <div class="kick"><b>V.4</b><span>Мир Гари</span></div>
+  <h2>Напитки, транспорт, оружие</h2>
+  <p>Три полки вещей. Числа — нижняя оценка: словарь мог пропустить слово. Слова с частым другим значением проверены по контексту: «виски» считается, только если это не висок, «джин» — только со строчной (Джин Сиберг — жена Гари), «чай» не считается вовсе, потому что это чаще частица.</p>
+  <div class="shelf-groups" id="shelves" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))"></div>
+  <div class="card" id="sh-card" style="margin-top:18px;max-width:560px"></div>
+</section>
+</div>
+
+<div class="part" id="part-perevod">
+<div class="part-head"><div class="n">Часть VI</div><h1>Оригинал и перевод</h1><p class="lead">Три книги есть и по-французски, и по-русски, четыре — в двух русских переводах. Что меняется при переводе.</p><div class="ch-links"><a href="#original"><span>VI.1</span>Три книги на двух языках</a><a href="#dva"><span>VI.2</span>Два перевода одной книги</a></div></div>
+<section id="original">
+  <div class="kick"><b>VI.1</b><span>Оригинал и перевод</span></div>
+  <h2>Три книги на двух языках</h2>
+  <p class="finding" id="f-original"></p>
+  <div class="panel"><div class="cap"><span class="t">Оригинал и перевод рядом</span><span class="u">фр. → рус.</span></div><div class="tbl" id="t-original"></div></div>
+</section>
+<section id="dva">
+  <div class="kick"><b>VI.2</b><span>Оригинал и перевод</span></div>
+  <h2>Два перевода одной книги</h2>
+  <p class="finding" id="f-dva"></p>
+  <div id="twins"></div>
+</section>
+</div>
+
+<div class="part" id="part-konec">
+<div class="part-head"><div class="n">Часть VII</div><h1>Рекорды и методика</h1><p class="lead">Самое длинное, самое разговорчивое, самое восклицательное — и как всё посчитано.</p><div class="ch-links"><a href="#rekordy"><span>VII.1</span>Рекорды</a><a href="#korpus"><span>VII.2</span>Корпус</a><a href="#metod"><span>VII.3</span>Методика</a></div></div>
+<section id="rekordy">
+  <div class="kick"><b>VII.1</b><span>Рекорды</span></div>
+  <h2>Рекорды</h2>
+  <div class="records" id="records"></div>
+  <h3 style="margin-top:26px">Самая длинная фраза</h3>
+  <blockquote id="longest-ru"></blockquote>
+  <blockquote id="longest-fr"></blockquote>
+</section>
+<section id="korpus">
+  <div class="kick"><b>VII.2</b><span>Методика</span></div>
+  <h2>Корпус</h2>
+  <p>Какие тексты вошли в анализ, откуда они и кто их переводил. Годы — первой публикации по библиографии французской Википедии; переводчики — из выходных данных книг, для трёх книг Ажара — из каталогов изданий.</p>
+  <div class="tbl" id="t-corpus"></div>
+</section>
+<section id="metod" class="method">
+  <div class="kick"><b>VII.3</b><span>Методика</span></div>
+  <h2>Методика</h2>
+  <ol id="method"></ol>
+</section>
+</div>
+
+<div class="endnote"><span>Ромен Гари на просвет · корпус и расчёты собраны автоматически, без ручной разметки</span><a href="#top">Наверх ↑</a></div>
+</div></div></div>

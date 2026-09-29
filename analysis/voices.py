@@ -342,6 +342,7 @@ def main():
     gp = sorted([p for p in night["paras"] if p["spk"] == "gary"], key=lambda p: -p["ntok"])
     bq = [p["t"] for p in night["paras"] if p["spk"] == "bondy" and 6 <= p["ntok"] <= 18]
     out["night"]["examples_q"] = bq[:6]
+    out["night"]["seq"] = [[p["ntok"], 1 if p["spk"] == "bondy" else 0] for p in night["paras"] if p["k"] != "head"]
     out["night"]["longest_answer_words"] = gp[0]["ntok"]
 
     json.dump(out, open(HERE / "voices.json", "w"), ensure_ascii=False, indent=0)
