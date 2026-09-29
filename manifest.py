@@ -131,7 +131,14 @@ for key, what in [("Vie_et_mort_dEmileAjar.md", "= «Ночь будет спо�
     w(key, "dup", note=what)
 
 # ── Найдено в ~/Downloads ──
-w("Azhar.Golubchik", "own", "Gros-Câlin", 1974, sign="Émile Ajar", tr="нет данных")
+w("Azhar.Golubchik", "dup", "Gros-Câlin", 1974, sign="Émile Ajar", note="rtf из ~/Downloads, 100% общих шинглов с EPUB")
+# добавлены заказчиком в Texts/ 2026-09-29; переводчик не указан ни в тексте, ни в метаданных
+# переводчики — по внешним каталогам (в файлах не указаны): FantLab edition60018 (Симпозиум, 2000),
+# каталоги изданий «Псевдо» (Симпозиум, 2002) и «Страхов царя Соломона» (перевод 1997)
+w("Gari_Golubchik.409694", "own", "Gros-Câlin", 1974, sign="Émile Ajar", tr="Н. Мавлевич", note="переводчик по FantLab")
+w("Gari_Psevdo.409695", "own", "Pseudo", 1976, sign="Émile Ajar", tr="А. Беляк", note="переводчик по каталогу издательства")
+w("Gari_Strahi-carya-Solomona.409696", "own", "L'Angoisse du roi Salomon", 1979, sign="Émile Ajar", tr="Л. Лунгина",
+  note="переводчик по FantLab / каталогам")
 w("Vsya-zhizn-vperedi", "own", "La Vie devant soi", 1975, sign="Émile Ajar", tr="В. Орлов")
 w("Romain Gary (1975) [DownSub", "oral", "Radioscopie, Jacques Chancel (2)", 1975, genre="интервью (автосубтитры)",
   note="29% общих шинглов с Interview.docx — та же передача")
