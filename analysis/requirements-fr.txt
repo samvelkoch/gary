@@ -1,0 +1,2 @@
+spacy>=3.7,<3.9
+# затем: python -m spacy download fr_core_news_sm
