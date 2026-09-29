@@ -1,0 +1,27 @@
+# ── Тексты Гари и переводы защищены авторским правом: в публичный репозиторий не попадают ──
+*.txt
+*.jsonl
+*.epub
+*.pkl
+*.docx
+*.pdf
+*.mp3
+corpus/
+texts/
+# собранные данные и страница содержат цитаты — пересобираются локально
+analysis/*.json
+analysis/*.npz
+*.html
+!analysis/*.template.html
+!analysis/report*.head.html
+!docs/*.html
+
+# ── окружения, кэш, служебное ──
+__pycache__/
+.venv*/
+analysis/.venv*/
+*.log
+.claude/
+.DS_Store
+!requirements*.txt
+!analysis/requirements*.txt
