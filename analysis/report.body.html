@@ -18,11 +18,35 @@
 .cmp th,.cmp td{padding:6px 10px; border-bottom:1px solid var(--grid); text-align:right; white-space:nowrap}
 .cmp th:first-child,.cmp td:first-child{text-align:left; white-space:normal}
 .cmp th{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); font-weight:400}
+.cmp th{white-space:normal}
+#twins .panel,#c-ustno{overflow-x:auto}
 .cmp td b{font-family:var(--f-mono); font-weight:500}
 .tagl{display:inline-block; font-family:var(--f-mono); font-size:11px; letter-spacing:.06em; padding:1px 6px; border-radius:2px; color:var(--surface); vertical-align:1px}
 .note{font-size:14.5px; color:var(--ink-2); max-width:70ch}
 .warnbox{border-left:3px solid var(--warn); padding:6px 0 6px 14px; margin:14px 0; font-size:15px; color:var(--ink-2); max-width:72ch}
 .wmap-note{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); margin:6px 0 0}
+.atlas.single{grid-template-columns:minmax(0,1fr)!important}
+.atlas.single .card{position:relative!important; top:auto!important; max-height:none!important; overflow:visible!important}
+.atlas.single{margin-bottom:18px}
+.cap .tag,h3 .tag{font-family:var(--f-mono); font-weight:500; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--mark); vertical-align:middle; margin-left:8px; border:1.5px solid var(--mark); padding:1px 5px; border-radius:2px; display:inline-block; white-space:nowrap}
+#net-wrap,#th-card,#yr-card,#cmp-panel{scroll-margin-top:70px}
+.mini3{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:3px 14px; font-size:14px; align-items:baseline}
+.mini3 .h{font-family:var(--f-mono); font-size:10.5px; color:var(--muted); text-align:right}
+.mini3 .n{font-family:var(--f-mono); font-size:12px; color:var(--muted); text-align:right}
+.mini3 button{all:unset; cursor:pointer; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0}
+.mini3 button:hover{color:var(--accent); text-decoration:underline}
+.mini3 button:focus-visible{outline:2px solid var(--mark)}
+.card .chips{margin-bottom:2px}
+.chip.static{cursor:default}
+.cmp-row{margin:0 0 16px; min-width:0}
+.cmp-row .h{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px; margin-bottom:4px}
+.cmp-row .h b{font-family:var(--f-display); font-size:18px; line-height:1.2}
+.cmp-row .h b button{all:unset; cursor:pointer}
+.cmp-row .h b button:hover{color:var(--accent); text-decoration:underline}
+.cmp-row .h span{font-family:var(--f-mono); font-size:11.5px; color:var(--muted)}
+.cmp-row .x{all:unset; cursor:pointer; font-family:var(--f-mono); font-size:12px; color:var(--muted); margin-left:auto; padding:0 4px}
+.cmp-row .x:hover{color:var(--mark)}
+.cmp-row canvas{display:block; background:var(--thumb,transparent)}
 </style>
 
 <div id="tip" role="tooltip" hidden></div>
@@ -45,7 +69,7 @@
   </div>
 </header>
 <div class="inner"><div class="layout">
-<nav class="rail" aria-label="Разделы"><div class="g">I · Обзор</div><a href="#glavnoe"><span>I.1</span>Главное коротко</a><a href="#mify"><span>I.2</span>Мифы и факты</a><a href="#hronologia"><span>I.3</span>Хронология</a><div class="g">II · Проза</div><a href="#fraza"><span>II.1</span>Фраза</a><a href="#dialog"><span>II.2</span>Диалог</a><a href="#ya"><span>II.3</span>Кто рассказывает</a><a href="#znaki"><span>II.4</span>Знаки</a><a href="#atlas"><span>II.5</span>Атлас книг</a><div class="g">III · Слова</div><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#epohi"><span>III.3</span>Слова эпох</a><a href="#temy"><span>III.4</span>Темы</a><a href="#gari-azhar"><span>III.5</span>Словарь Ажара</a><div class="g">IV · Голоса</div><a href="#golosa"><span>IV.1</span>Гари, Ажар, Синибальди</a><a href="#shum"><span>IV.2</span>Голос или переводчик</a><a href="#noch"><span>IV.3</span>«Ночь будет спокойной»</a><a href="#ustno"><span>IV.4</span>Гари вслух</a><div class="g">V · Мир Гари</div><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#mesta"><span>V.2</span>Места</a><a href="#zveri"><span>V.3</span>Звери</a><a href="#polki"><span>V.4</span>Напитки, транспорт, оружие</a><div class="g">VI · Оригинал и перевод</div><a href="#original"><span>VI.1</span>Три книги на двух языках</a><a href="#dva"><span>VI.2</span>Два перевода одной книги</a><div class="g">VII · Рекорды и методика</div><a href="#rekordy"><span>VII.1</span>Рекорды</a><a href="#korpus"><span>VII.2</span>Корпус</a><a href="#metod"><span>VII.3</span>Методика</a></nav>
+<nav class="rail" aria-label="Разделы"><div class="g">I · Обзор</div><a href="#glavnoe"><span>I.1</span>Главное коротко</a><a href="#mify"><span>I.2</span>Мифы и факты</a><a href="#hronologia"><span>I.3</span>Хронология</a><div class="g">II · Проза</div><a href="#fraza"><span>II.1</span>Фраза</a><a href="#dialog"><span>II.2</span>Диалог</a><a href="#ya"><span>II.3</span>Кто рассказывает</a><a href="#znaki"><span>II.4</span>Знаки</a><a href="#atlas"><span>II.5</span>Атлас книг</a><div class="g">III · Слова</div><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#karta"><span>III.3</span>Карта словаря</a><a href="#epohi"><span>III.4</span>Слова эпох</a><a href="#temy"><span>III.5</span>Темы</a><a href="#gari-azhar"><span>III.6</span>Словарь Ажара</a><a href="#cveta"><span>III.7</span>Цвета</a><div class="g">IV · Голоса</div><a href="#golosa"><span>IV.1</span>Гари, Ажар, Синибальди</a><a href="#shum"><span>IV.2</span>Голос или переводчик</a><a href="#noch"><span>IV.3</span>«Ночь будет спокойной»</a><a href="#ustno"><span>IV.4</span>Гари вслух</a><div class="g">V · Мир Гари</div><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#krug"><span>V.2</span>Круг Гари</a><a href="#mesta"><span>V.3</span>Места</a><a href="#zveri"><span>V.4</span>Звери</a><a href="#polki"><span>V.5</span>Напитки, транспорт, оружие</a><div class="g">VI · Оригинал и перевод</div><a href="#original"><span>VI.1</span>Три книги на двух языках</a><a href="#dva"><span>VI.2</span>Два перевода одной книги</a><div class="g">VII · Рекорды и методика</div><a href="#rekordy"><span>VII.1</span>Рекорды</a><a href="#korpus"><span>VII.2</span>Корпус</a><a href="#metod"><span>VII.3</span>Методика</a></nav>
 <div class="content">
 
 <div class="part" id="part-obzor">
@@ -63,11 +87,13 @@
 </section>
 <section id="hronologia">
   <div class="kick"><b>I.3</b><span>Обзор</span></div>
-  <h2>Хронология</h2>
+  <h2>Хронология <span class="tag">интерактив</span></h2>
   <p id="t-chrono"></p>
   <div class="panel"><div class="cap"><span class="t">Книги по годам первой публикации</span><span class="u">высота — число слов в русском переводе или во французском оригинале</span></div>
     <div class="legend" id="lg-chrono"></div>
-    <div class="chart" id="c-chrono"></div></div>
+    <div class="chart" id="c-chrono"></div>
+    <p class="note">Нажмите на столбик, чтобы открыть карточку года.</p></div>
+  <div class="atlas single"><div class="card" id="yr-card" aria-live="polite"></div></div>
   <div class="grid2">
     <div class="panel"><div class="cap"><span class="t">Из чего состоит корпус</span><span class="u">тыс. слов</span></div>
       <div class="chart" id="c-corpus"></div></div>
@@ -113,7 +139,7 @@
 </section>
 <section id="atlas">
   <div class="kick"><b>II.5</b><span>Проза</span></div>
-  <h2>Атлас книг</h2>
+  <h2>Атлас книг <span class="tag">интерактив</span></h2>
   <p>Все книги корпуса: русские переводы, французские оригиналы и книги «Гари о себе». Выберите книгу в списке или на листах шапки. В карточке — меры, строение книги по абзацам, характерные слова, главные имена, первая и последняя фразы.</p>
   <div class="atlas">
     <div class="panel" style="margin:0"><div class="cap"><span class="t">Книги</span><span class="u">нажмите на строку</span></div>
@@ -121,11 +147,14 @@
       <div class="chart" id="c-atlas"></div></div>
     <div class="card" id="card"></div>
   </div>
+  <div class="panel" id="cmp-panel"><div class="cap"><span class="t">Строение рядом <span class="tag">интерактив</span></span><span class="u">слева направо — от начала книги до конца; штрих — абзац (чем выше, тем длиннее, выше 250 слов — срезано), красным — реплики</span></div>
+    <div class="ctrl"><label class="lab" for="cmp-sel">Добавить книгу</label><select id="cmp-sel"></select><button class="btn" type="button" id="cmp-add">Добавить</button><button class="btn" type="button" id="cmp-clear">Очистить</button></div>
+    <div id="cmp-list"></div></div>
 </section>
 </div>
 
 <div class="part" id="part-slova">
-<div class="part-head"><div class="n">Часть III</div><h1>Слова</h1><p class="lead">Какие слова у Гари самые частые, как словарь меняется по годам, какие темы держатся всю жизнь и чем словарь Ажара отличается от словаря Гари.</p><div class="ch-links"><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#epohi"><span>III.3</span>Слова эпох</a><a href="#temy"><span>III.4</span>Темы</a><a href="#gari-azhar"><span>III.5</span>Словарь Ажара</a></div></div>
+<div class="part-head"><div class="n">Часть III</div><h1>Слова</h1><p class="lead">Какие слова у Гари самые частые, как словарь меняется по годам, какие темы держатся всю жизнь и чем словарь Ажара отличается от словаря Гари.</p><div class="ch-links"><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#karta"><span>III.3</span>Карта словаря</a><a href="#epohi"><span>III.4</span>Слова эпох</a><a href="#temy"><span>III.5</span>Темы</a><a href="#gari-azhar"><span>III.6</span>Словарь Ажара</a><a href="#cveta"><span>III.7</span>Цвета</a></div></div>
 <section id="slovar">
   <div class="kick"><b>III.1</b><span>Слова</span></div>
   <h2>Частые слова</h2>
@@ -148,30 +177,52 @@
       <div class="chart" id="c-xbooks"></div></div>
   </div>
 </section>
-<section id="epohi">
+<section id="karta">
   <div class="kick"><b>III.3</b><span>Слова</span></div>
+  <h2>Карта словаря <span class="tag">интерактив</span></h2>
+  <p id="t-karta"></p>
+  <div class="wm-ctl">
+    <button type="button" class="wm-play" id="wm-play">▶ Играть</button>
+    <div class="wm-per" id="wm-per" role="group" aria-label="Период"></div>
+    <input type="search" id="wm-find" placeholder="найти слово на карте" autocomplete="off" spellcheck="false" aria-label="Найти слово на карте">
+  </div>
+  <div class="ctrl"><span class="lab">Группа</span><div class="chips" id="wm-groups"></div></div>
+  <div class="panel"><div class="chart wmap" id="c-wmap"></div></div>
+  <p class="wm-read" id="wm-read" aria-live="polite"></p>
+</section>
+<section id="epohi">
+  <div class="kick"><b>III.4</b><span>Слова</span></div>
   <h2>Слова эпох</h2>
   <p>Для каждого периода — слова, которые в нём встречаются заметно чаще, чем в остальные годы. Слово засчитывается, только если оно есть хотя бы в двух книгах периода, иначе это слово одной книги. Число в скобках — в скольких книгах периода встречается слово.</p>
   <div class="grid2" id="eras" style="gap:16px"></div>
 </section>
 <section id="temy">
-  <div class="kick"><b>III.4</b><span>Слова</span></div>
-  <h2>Темы</h2>
+  <div class="kick"><b>III.5</b><span>Слова</span></div>
+  <h2>Темы <span class="tag">интерактив</span></h2>
   <p class="finding" id="f-temy"></p>
-  <p>Шестнадцать тем, в каждой 12–20 слов, темы не пересекаются. Число — сколько слов темы приходится на тысячу слов текста. Нажмите на тему, чтобы увидеть её слова и книгу, где тема звучит громче всего.</p>
+  <p>Шестнадцать тем, в каждой 12–20 слов, темы не пересекаются. Число — сколько слов темы приходится на тысячу слов текста. Нажмите на тему — откроется карточка: как тема менялась по периодам, её слова и книги, где она звучит громче всего.</p>
   <div class="panel"><div class="cap"><span class="t">Темы по периодам и подписям</span><span class="u">на 1000 слов</span></div>
     <div class="ctrl"><span class="lab">Показать</span><div id="fl-mode"></div></div>
     <div class="chart" id="c-fields"></div>
-    <div id="fl-drill" class="note" style="margin-top:12px"></div></div>
+</div>
+  <div class="atlas single"><div class="card" id="th-card" aria-live="polite"></div></div>
 </section>
 <section id="gari-azhar">
-  <div class="kick"><b>III.5</b><span>Слова</span></div>
+  <div class="kick"><b>III.6</b><span>Слова</span></div>
   <h2>Словарь Ажара</h2>
   <p>Слова, которые в четырёх книгах Ажара встречаются заметно чаще, чем в книгах Гари, и наоборот. Это сравнение русских переводов, поэтому оно говорит о темах и героях, а не о голосе: голос сравнивается по оригиналам в части IV.</p>
   <div class="grid2">
     <div class="panel"><div class="cap"><span class="t">Чаще у Ажара</span><span class="u">сила отличия</span></div><div class="chart" id="c-aw"></div></div>
     <div class="panel"><div class="cap"><span class="t">Чаще у Гари</span><span class="u">сила отличия</span></div><div class="chart" id="c-gw"></div></div>
   </div>
+</section>
+<section id="cveta">
+  <div class="kick"><b>III.7</b><span>Слова</span></div>
+  <h2>Цвета <span class="tag">интерактив</span></h2>
+  <p class="finding" id="f-cveta"></p>
+  <p>Цветовые слова русских переводов по заданному списку («белый», «чёрный», «рыжий», «седой»…) по периодам. Ширина отрезка — доля слова среди цветовых слов периода. Нажмите на цвет, чтобы открыть слово в словоискателе.</p>
+  <div class="panel"><div class="cap"><span class="t">Палитра периодов</span><span class="u">доля среди цветовых слов</span></div>
+    <div class="chart" id="c-palette"></div></div>
 </section>
 </div>
 
@@ -227,7 +278,7 @@
 </div>
 
 <div class="part" id="part-mir">
-<div class="part-head"><div class="n">Часть V</div><h1>Мир Гари</h1><p class="lead">Кого Гари упоминает из книги в книгу, где происходит действие, какие звери, напитки, машины и ружья населяют его романы.</p><div class="ch-links"><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#mesta"><span>V.2</span>Места</a><a href="#zveri"><span>V.3</span>Звери</a><a href="#polki"><span>V.4</span>Напитки, транспорт, оружие</a></div></div>
+<div class="part-head"><div class="n">Часть V</div><h1>Мир Гари</h1><p class="lead">Кого Гари упоминает из книги в книгу, где происходит действие, какие звери, напитки, машины и ружья населяют его романы.</p><div class="ch-links"><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#krug"><span>V.2</span>Круг Гари</a><a href="#mesta"><span>V.3</span>Места</a><a href="#zveri"><span>V.4</span>Звери</a><a href="#polki"><span>V.5</span>Напитки, транспорт, оружие</a></div></div>
 <section id="panteon">
   <div class="kick"><b>V.1</b><span>Мир Гари</span></div>
   <h2>Пантеон</h2>
@@ -238,8 +289,18 @@
     <div class="card" id="pn-card"></div>
   </div>
 </section>
-<section id="mesta">
+<section id="krug">
   <div class="kick"><b>V.2</b><span>Мир Гари</span></div>
+  <h2>Круг Гари <span class="tag">интерактив</span></h2>
+  <p id="t-net"></p>
+  <p class="finding" id="f-krug"></p>
+  <div class="wd-ctl"><span class="lab">Период</span><div class="chips" id="pp-per"></div></div>
+  <div class="wd-ctl"><input type="search" id="pp-find" placeholder="найти имя" autocomplete="off" spellcheck="false" aria-label="Найти имя"><div class="chips" id="pp-sug"></div></div>
+  <div class="ctrl"><span class="lab">Круги</span><div class="chips" id="pp-clusters"></div></div>
+  <div class="wd-grid" id="net-wrap"><div class="panel" style="margin:0"><div class="chart" id="c-net"></div></div><aside class="card" id="pp-card" aria-live="polite"></aside></div>
+</section>
+<section id="mesta">
+  <div class="kick"><b>V.3</b><span>Мир Гари</span></div>
   <h2>Места</h2>
   <p class="finding" id="f-mesta"></p>
   <div class="wd-grid">
@@ -248,7 +309,7 @@
   </div>
 </section>
 <section id="zveri">
-  <div class="kick"><b>V.3</b><span>Мир Гари</span></div>
+  <div class="kick"><b>V.4</b><span>Мир Гари</span></div>
   <h2>Звери</h2>
   <p class="finding" id="f-zveri"></p>
   <div class="shelf">
@@ -257,7 +318,7 @@
   </div>
 </section>
 <section id="polki">
-  <div class="kick"><b>V.4</b><span>Мир Гари</span></div>
+  <div class="kick"><b>V.5</b><span>Мир Гари</span></div>
   <h2>Напитки, транспорт, оружие</h2>
   <p>Три полки вещей. Числа — нижняя оценка: словарь мог пропустить слово. Слова с частым другим значением проверены по контексту: «виски» считается, только если это не висок, «джин» — только со строчной (Джин Сиберг — жена Гари), «чай» не считается вовсе, потому что это чаще частица.</p>
   <div class="shelf-groups" id="shelves" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))"></div>

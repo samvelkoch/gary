@@ -128,8 +128,8 @@ chart(()=>{ const box=$('#c-chrono'); const h=250; const [s,w]=svg(box,h); const
     const right=x+t.length*6+6<w; txt(s,right?x+3:x-3,T0-10+lv*12,t,{'text-anchor':right?'start':'end',style:'fill:var(--ink-2);font-size:10.5px'}); });
   const bw=Math.max(3,(w-L-R)/(y1-y0)-2);
   Object.entries(byY).forEach(([y,L_])=>{ let acc=0; L_.forEach(x=>{ const v=x.a.words/1000; const top=sy(acc+v), bot=sy(acc);
-    el('rect',{x:sx(+y)-bw/2,y:top,width:bw,height:Math.max(1,bot-top-1),fill:sc(x.sign),'data-tip':`<b>${esc(T(x.a))}</b><br>${y} · ${SIGN[x.sign]} · ${fmt(x.a.words)} слов${x.a.lang==='fr'?' (оригинал)':''}`,class:'clickable'},s)
-      .addEventListener('click',()=>selectBook(x.a.i,true)); acc+=v; }); });
+    el('rect',{x:sx(+y)-bw/2,y:top,width:bw,height:Math.max(1,bot-top-1),fill:sc(x.sign),'data-tip':`<b>${esc(T(x.a))}</b><br>${y} · ${SIGN[x.sign]} · ${fmt(x.a.words)} слов${x.a.lang==='fr'?' (оригинал)':''}<br>нажмите — карточка ${y} года`,class:'clickable'},s)
+      .addEventListener('click',()=>yearCard(+y,true)); acc+=v; }); });
   el('line',{x1:L,x2:w-R,y1:h-B,y2:h-B,stroke:css('--axis')},s);
 }, $('#c-chrono'));
 hbars($('#c-corpus'), [
@@ -204,12 +204,12 @@ function selectBook(i, scroll){ hs.sel=i; drawSheets(); const a=A[i]; const host
   host.innerHTML=`<div class="eyebrow">${a.role==='self'?'Гари о себе':'атлас'} · ${LANG[a.lang]}</div><div class="ttl">${esc(T(a))}</div>
     <div class="meta">${orig?orig+' · ':''}${yr(a)} · <span class="tagl" style="background:${sc(a.sign)}">${SIGN[a.sign]||''}</span>${a.lang==='ru'?` · перевод: ${esc(a.tr||'нет данных')}`:''}</div>
     <div class="tiles">${tiles.map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>
-    <h4>Строение: абзацы по порядку</h4><div class="struct" id="card-struct"></div><p class="struct-note">Штрих — абзац, длина — число слов. Красные — реплики диалога.</p>
+    <h4>Строение: абзацы по порядку</h4><div class="struct" id="card-struct"></div><p class="struct-note">Штрих — абзац, длина — число слов. Красные — реплики диалога.</p><button type="button" class="btn" id="card-cmp" style="margin-top:10px">+ в «Строение рядом»</button>
     <h4>Характерные слова</h4><div class="chips">${chars||'<span class="muted">—</span>'}</div>
     <h4>Главные имена и места</h4><p style="font-size:14.5px;margin:0">${names||'—'}</p>${fl}
     <h4>Первая фраза</h4><blockquote>${esc(a.first)}</blockquote><h4>Последняя фраза</h4><blockquote>${esc(a.last)}</blockquote>`;
   host.querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('click',()=>{ const k=LEXN[norm(b.dataset.w)]; if(k){ openWord(k,true); } }));
-  drawStruct($('#card-struct'), a);
+  drawStruct($('#card-struct'), a); $('#card-cmp').addEventListener('click',()=>{ cmpAdd(i); goTo('cmp-panel'); });
   if(scroll) document.getElementById('atlas').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); }
 function drawStruct(host, a){ const W=Math.max(200,host.clientWidth||300); const n=a.seq.length; const rh=Math.max(1.4,Math.min(4,560/n)); const H=Math.ceil(n*rh)+4;
   const cv=document.createElement('canvas'); const dpr=Math.min(2,devicePixelRatio||1); cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; host.innerHTML=''; host.appendChild(cv);
@@ -251,13 +251,10 @@ $('#eras').querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('cli
 const FN=D.fields.names; let flMode='per', flDrill=FN.indexOf('Звери');
 function drawFields(){ const cols = flMode==='per'?PER:['Гари','Ажар','Шатан Богат'];
   const M = FN.map(f=> flMode==='per'? D.fields.per.map(r=>r[f]) : cols.map(c=>D.fields.sign[c][f]));
-  heatTable($('#c-fields'), FN, cols, M, {labelW:170, cellH:27, active:flDrill, onRow:i=>{ flDrill=i; drawFields(); drawDrill(); },
+  heatTable($('#c-fields'), FN, cols, M, {labelW:170, cellH:27, active:flDrill, onRow:i=>{ flDrill=i; drawFields(); thPick(i,true); },
     tipf:(i,j)=>`${esc(FN[i])} · ${esc(cols[j])}: ${fmt2(M[i][j])} на 1000 слов`, fmtv:fmt1}); }
-function drawDrill(){ const f=FN[flDrill]; const W=D.fields.words[f].filter(x=>x[1]>0); const [bi,bv]=D.fields.lead[f];
-  $('#fl-drill').innerHTML=`<b>${esc(f)}</b>: ${W.map(([w,n])=>`<button type="button" class="lnk" data-w="${esc(w)}">${esc(w)}</button> <span class="muted">${fmt(n)}</span>`).join(' · ')}. Громче всего тема звучит в книге ${TQ(A[bi])} — ${fmt1(bv)} на 1000 слов.`;
-  $('#fl-drill').querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('click',()=>{ const k=LEXN[norm(b.dataset.w)]; if(k) openWord(k,true); })); }
 seg($('#fl-mode'), [['per','по периодам'],['sign','по подписям']], 'per', v=>{ flMode=v; drawFields(); });
-drawFields(); drawDrill();
+drawFields();
 (()=>{ const P=D.fields.per; const prev=f=>P.slice(0,NPER-1).reduce((a,r)=>a+r[f],0)/(NPER-1);
   const rel=FN.map(f=>[f,P[NPER-1][f]/Math.max(prev(f),1e-9)]).sort((a,b)=>b[1]-a[1]); const up=rel.slice(0,2), dn=rel.slice(-2).reverse();
   const zi=P.map(r=>r['Звери']);
@@ -378,10 +375,14 @@ function strip(box, groups){ return chart(()=>{ const rowH=34, labelW=Math.min(2
   $('#f-ustno').textContent=`Вслух Гари говорит ближе всего к «Обещанию на рассвете»: так во всех вариантах — вся устная речь, отдельно каждая передача, с местоимениями и без. Чище всего это видно в «Propos et confidences», где говорит почти один Гари: ${fmt2(p.Promesse)} против ${fmt2(second(p))} до следующей книги. В «Радиоскопии» отрыв меньше (${fmt2(r.Promesse)} против ${fmt2(second(r))}): там в субтитрах есть и голос ведущего.`; })();
 
 /* ================= V. мир Гари ================= */
+function listLinks(title){ const k=LEXN[norm(title)]; const inNet=EX.net.nodes.some(n=>n.name===title);
+  return (k||inNet)?`<p class="chips" style="margin-top:14px">${k?`<button type="button" class="btn" data-open="${esc(k)}">Открыть в словоискателе →</button>`:''}${inNet?`<button type="button" class="btn" data-net="${esc(title)}">Карточка в «Круге Гари» →</button>`:''}</p>`:''; }
 function listCard(host, title, sub, books, ex){ const mx=Math.max(...books.map(x=>x[1]),1);
   host.innerHTML=`<div class="eyebrow">${esc(sub)}</div><div class="ttl">${esc(title)}</div><ul class="sh-list" style="margin-top:10px">${
     books.map(([b,n])=>`<li><button type="button" data-b="${b}" title="${esc(T(A[b]))}">${esc(T(A[b]))} <span class="muted">${A[b].year||''}</span></button><span class="b"><i style="width:${Math.max(3,Math.round(100*n/mx))}%;background:${sc(A[b].sign)}"></i></span><span class="n">${fmt(n)}</span></li>`).join('')}</ul>
-    ${ex?`<h4>Пример</h4><blockquote>${esc(ex[0])}<cite>${esc(T(A[ex[1]]))}</cite></blockquote>`:''}`;
+    ${ex?`<h4>Пример</h4><blockquote>${esc(ex[0])}<cite>${esc(T(A[ex[1]]))}</cite></blockquote>`:''}${listLinks(title)}`;
+  host.querySelectorAll('button[data-open]').forEach(x=>x.addEventListener('click',()=>openWord(x.dataset.open,true)));
+  host.querySelectorAll('button[data-net]').forEach(x=>x.addEventListener('click',()=>{ ntSelectByName(x.dataset.net); goTo('krug'); }));
   host.querySelectorAll('button[data-b]').forEach(x=>x.addEventListener('click',()=>selectBook(+x.dataset.b,true))); }
 (()=>{ const P=D.pantheon; hbars($('#c-panteon'), P.slice(0,30).map(r=>({l:r[0],v:r[1],r,tip:`${esc(r[0])}: ${r[1]} книг, ${r[2]} упоминаний`})), {labelW:140, rowH:21, fmtv:fmt, onClick:x=>listCard($('#pn-card'),x.r[0],`${x.r[1]} книг · ${x.r[2]} упоминаний`,x.r[3])});
   listCard($('#pn-card'),P[0][0],`${P[0][1]} книг · ${P[0][2]} упоминаний`,P[0][3]);
