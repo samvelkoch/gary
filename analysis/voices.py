@@ -184,42 +184,52 @@ def main():
                  "words_narr": {k: len(stream(fr[k])) for k in FR_BOOKS},
                  "words_all": {k: len(fr[k]["tokens"]) for k in FR_BOOKS}}
 
-    # устная и отредактированная речь — проекция в то же пространство (в расчёт вердиктов не входит)
-    oral = [d for d in docs if d["role"] == "oral"]
-    oral_words = []
-    for d in oral:
-        oral_words += [t.lower().replace("’", "'") for t in d["tokens"]]
+    # устная и отредактированная речь — проекция в то же пространство (в расчёт вердиктов не входит).
+    # Варианты: все частые слова и без местоимений; устная речь целиком, только «Propos et confidences»
+    # (почти монолог Гари) и только «Радиоскопия» (там есть реплики Шанселя и ведущего).
+    def oral_words(pred, drop_pron):
+        w = []
+        for d in docs:
+            if d["role"] == "oral" and pred(d["work"]):
+                for t, l, pos in zip(d["tokens"], d["lemmas"], d["pos"]):
+                    if drop_pron and (l in PRON_FR or pos == "PRON"):
+                        continue
+                    w.append(t.lower().replace("’", "'"))
+        return w
     sens = next(d for d in docs if d["work"] == "Le Sens de ma vie")
-    books = {k: stream(fr[k]) for k in FR_BOOKS}
-    labels, Z, mfw, _ = delta_space(books, size_fr, MAIN)
-    ix = {w: i for i, w in enumerate(mfw)}
-    # те же μ, σ: пересчёт из сбалансированной выборки
-    ch = {b: chunks(w, size_fr) for b, w in books.items()}
-    k = min(len(c) for c in ch.values())
-    bal = []
-    for b, c in ch.items():
-        idx = np.linspace(0, len(c) - 1, k).round().astype(int)
-        bal += [c[i] for i in sorted(set(idx))]
-
-    def freq(c):
-        v = np.zeros(len(mfw))
-        for w in c:
-            j = ix.get(w)
-            if j is not None:
-                v[j] += 1
-        return v / len(c)
-    Fb = np.array([freq(c) for c in bal]); mu, sd = Fb.mean(0), Fb.std(0) + 1e-12
-    extra = {"oral": chunks(oral_words, size_fr), "sens": chunks(stream(sens, ("narr", "dialog")), size_fr)}
-    D0 = pair_delta(Z)
-    names, M = book_dist(labels, D0)
     proj = {}
-    for nm, cs in extra.items():
-        if not cs:
-            continue
-        Ze = (np.array([freq(c) for c in cs]) - mu) / sd
-        dd = np.abs(Ze[:, None, :] - Z[None, :, :]).mean(-1)
-        proj[nm] = {"n_chunks": len(cs),
-                    "to_book": {b: round(float(dd[:, [i for i, l in enumerate(labels) if l[0] == b]].mean()), 4) for b in FR_BOOKS}}
+    for variant, dp in (("narr", False), ("narr_nopron", True)):
+        books = {k: stream(fr[k], ("narr",), dp) for k in FR_BOOKS}
+        labels, Z, mfw, _ = delta_space(books, size_fr, MAIN)
+        ix = {w: i for i, w in enumerate(mfw)}
+        ch = {b: chunks(w, size_fr) for b, w in books.items()}
+        k = min(len(c) for c in ch.values())
+        bal = []
+        for b, c in ch.items():
+            idx = np.linspace(0, len(c) - 1, k).round().astype(int)
+            bal += [c[i] for i in sorted(set(idx))]
+
+        def freq(c):
+            v = np.zeros(len(mfw))
+            for w in c:
+                j = ix.get(w)
+                if j is not None:
+                    v[j] += 1
+            return v / len(c)
+        Fb = np.array([freq(c) for c in bal]); mu, sd = Fb.mean(0), Fb.std(0) + 1e-12
+        sets = {"oral": oral_words(lambda w: True, dp), "propos": oral_words(lambda w: w.startswith("Propos"), dp),
+                "radioscopie": oral_words(lambda w: w.startswith("Radioscopie"), dp),
+                "sens": stream(sens, ("narr", "dialog"), dp)}
+        pv = {}
+        for nm, words in sets.items():
+            cs = chunks(words, size_fr)
+            if not cs:
+                continue
+            Ze = (np.array([freq(c) for c in cs]) - mu) / sd
+            dd = np.abs(Ze[:, None, :] - Z[None, :, :]).mean(-1)
+            pv[nm] = {"n_chunks": len(cs), "words": len(words),
+                      "to_book": {b: round(float(dd[:, [i for i, l in enumerate(labels) if l[0] == b]].mean()), 4) for b in FR_BOOKS}}
+        proj[variant] = pv
     out["fr"]["projection"] = proj
 
     # ================= русский: переводы =================

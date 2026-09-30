@@ -21,7 +21,12 @@ CONTENT_FR = {"NOUN", "VERB", "ADJ", "ADV"}
 STOP_RU = set("""быть мочь который мой твой наш ваш свой этот тот весь такой какой самый сам один потому так там тут здесь
 теперь уже ещё очень только даже тоже вот как где когда сейчас всегда никогда почему зачем тогда потом затем сразу вдруг
 просто совсем ничто никто что кто себя свой каждый любой другой иной весьма столь стать иметь сказать есть бывать""".split())
-STOP_FR = set("être avoir faire pouvoir aller dire vouloir falloir devoir tout même autre plus très bien aussi encore jamais toujours alors donc ainsi là ici".split())
+STOP_FR = set("être avoir faire pouvoir aller dire vouloir falloir devoir tout même autre plus très bien aussi encore jamais toujours alors donc ainsi là ici tel personn ne pas fu".split())
+# местоименные прилагательные: морфология относит их к прилагательным, но это служебные слова
+APRO_RU = set("""который свой тот этот весь такой мой твой наш ваш один сам другой самый какой какой-то каждый всякий
+никакой некоторый иной чей любой сей должный их её его""".split())
+STOP_RU |= APRO_RU
+bad_fr = lambda l: ("’" in l or "'" in l or len(l) < 2)
 WORD_RU = re.compile(r"[А-Яа-яЁё]+(?:-[А-Яа-яЁё]+)*")
 
 # смысловые поля (русский): леммы pymorphy; поля не пересекаются
@@ -135,7 +140,7 @@ def main():
     def content_lemmas(d):
         keep = CONTENT_RU if d["lang"] == "ru" else CONTENT_FR
         stop = STOP_RU if d["lang"] == "ru" else STOP_FR
-        return [l for i, (l, p) in enumerate(zip(d["lemmas"], d["pos"])) if p in keep and not is_name(d, i) and len(l) > 1 and l not in stop]
+        return [l for i, (l, p) in enumerate(zip(d["lemmas"], d["pos"])) if p in keep and not is_name(d, i) and len(l) > 1 and l not in stop and not bad_fr(l)]
 
     CL = {id(d): Counter(content_lemmas(d)) for d in ru + fr}
     RU_ALL = Counter(); [RU_ALL.update(CL[id(d)]) for d in ru]
@@ -251,15 +256,16 @@ def main():
         c = Counter(); tot = 0
         for d in docs_:
             tot += len(d["tokens"])
+            stop = STOP_RU if d["lang"] == "ru" else STOP_FR
             for i, (l, p) in enumerate(zip(d["lemmas"], d["pos"])):
-                if p in keepset and not is_name(d, i) and len(l) > 1:
+                if p in keepset and not is_name(d, i) and len(l) > 1 and l not in stop and not bad_fr(l):
                     c[l] += 1
         return [[w, n_, round(10000 * n_ / tot, 1)] for w, n_ in c.most_common(n)]
     STOPV_RU = {"быть", "мочь", "сказать", "стать", "иметь"}
     top_words = {
-        "ru": {"nouns": top_pos(ru, {"NOUN"}), "verbs": [x for x in top_pos(ru, {"VERB", "INFN"}, 30) if x[0] not in STOPV_RU][:25],
+        "ru": {"nouns": top_pos(ru, {"NOUN"}), "verbs": top_pos(ru, {"VERB", "INFN"}),
                "adjs": top_pos(ru, {"ADJF", "ADJS"})},
-        "fr": {"nouns": top_pos(fr, {"NOUN"}), "verbs": [x for x in top_pos(fr, {"VERB"}, 30) if x[0] not in ("être", "avoir", "faire", "pouvoir", "dire", "aller")][:25],
+        "fr": {"nouns": top_pos(fr, {"NOUN"}), "verbs": top_pos(fr, {"VERB"}),
                "adjs": top_pos(fr, {"ADJ"})},
     }
 
@@ -392,12 +398,20 @@ def main():
                   "v": {"differs": "yes", "within": "no", "border": "part", "unstable": "no"}[vs_],
                   "num": f"«Человек с голубкой» отстоит от романов Гари на {M200['sini_gary']:.2f} — это не дальше, чем романы Гари друг от друга ({M200['base'][0]:.2f}). "
                          f"По частым словам под этой маской Гари от самого себя не отличить."})
-    pj = V["fr"]["projection"]["oral"]["to_book"]
-    near_oral = min(pj, key=pj.get)
+    PJ = V["fr"]["projection"]
+    # правило: «Обещание» ближе всех во всех вариантах (с местоимениями и без; вся устная речь, только
+    # «Propos et confidences», только «Радиоскопия») и отрыв от следующей книги ≥ 5% — «подтверждается»;
+    # ближе всех везде, но отрыв где-то меньше — «отчасти»; иначе — «не подтверждается»
+    cells = [(v, k, r["to_book"]) for v in PJ for k, r in PJ[v].items() if k != "sens"]
+    near_all = all(min(tb, key=tb.get) == "Promesse" for _, _, tb in cells)
+    gaps = [sorted(tb.values())[1] / tb["Promesse"] - 1 for _, _, tb in cells]
+    pj = PJ["narr"]["oral"]["to_book"]; pp = PJ["narr"]["propos"]["to_book"]; pn = PJ["narr_nopron"]["propos"]["to_book"]
     myths.append({"id": "oral", "q": "В интервью Гари говорит языком «Обещания на рассвете»",
-                  "v": "yes" if near_oral == "Promesse" and sorted(pj.values())[1] / pj["Promesse"] >= 1.05 else "part" if near_oral == "Promesse" else "no",
+                  "v": "yes" if near_all and min(gaps) >= 0.05 else ("part" if near_all else "no"),
                   "num": f"Устная речь (радио 1975 и 1980, автосубтитры) ближе всего к «Обещанию»: {pj['Promesse']:.2f}; к «Корням неба» — {pj['Racines']:.2f}, "
-                         f"к «Жизни впереди» — {pj['Vie']:.2f}. Частые слова устной речи — как у автобиографической прозы."})
+                         f"к «Жизни впереди» — {pj['Vie']:.2f}. Только передача «Propos et confidences», где говорит почти один Гари: {pp['Promesse']:.2f} против {min(v for k, v in pp.items() if k != 'Promesse'):.2f}; "
+                         f"без местоимений — {pn['Promesse']:.2f} против {min(v for k, v in pn.items() if k != 'Promesse'):.2f}. «Обещание» ближе всех во всех {len(cells)} вариантах, "
+                         f"наименьший отрыв — {100 * min(gaps):.0f}% (в «Радиоскопии», где говорит и ведущий)."})
     # мать в «Обещании»: доля слов «мать/мама/матушка» против медианы книг
     mom = lambda d: 1000 * sum(1 for l in d["lemmas"] if l in ("мать", "мама", "матушка")) / len(d["tokens"])
     pr = next(d for d in ru if d["work"] == "La Promesse de l'aube")

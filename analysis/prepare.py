@@ -75,10 +75,14 @@ def clean_book(ps, fname):
     return ps
 
 
+DIALOG_MAX = 120  # абзац-реплика длиннее — это рассказ героя (рассказ в рассказе), он считается повествованием
+
+
 def kind(p):
-    if len(p.split()) <= 8 and not TERM.search(p):
+    n = len(p.split())
+    if n <= 8 and not TERM.search(p):
         return "head"
-    return "dialog" if DIALOG.match(p) else "narr"
+    return "dialog" if DIALOG.match(p) and n <= DIALOG_MAX else "narr"
 
 
 def split_speakers_night(ps):
