@@ -25,7 +25,6 @@ const yr = a => a.year || 'без даты';
 const big = a => a.lang==='ru' && a.role==='own' && a.words>=10000;
 const RU_OWN = A.filter(a=>a.lang==='ru'&&a.role==='own'), FR_OWN = A.filter(a=>a.lang==='fr'&&a.role==='own');
 const pct = v => fmt1(v)+'%';
-const plural = (n, one, few, many) => { const m10=n%10, m100=n%100; return m10===1&&m100!==11?one:(m10>=2&&m10<=4&&(m100<12||m100>14)?few:many); };
 function verdictHTML(v){ const m={yes:['v-yes','✓ подтверждается'],no:['v-no','✗ не подтверждается'],part:['v-part','≈ отчасти'],none:['v-part','цифрами не решается']}[v]||['v-part','—'];
   return `<span class="verdict ${m[0]}">${m[1]}</span>`; }
 function legendTo(host, items){ host.innerHTML=items.map(([l,c])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join(''); }
@@ -34,11 +33,11 @@ const SIGN_ITEMS = [['Гари','var(--s1)'],['Эмиль Ажар','var(--s2)']
 /* ================= шапка ================= */
 const O = D.overview;
 const VF = V.fr.variants, F200 = VF.narr.by_mfw['200'];
-$('#lede').innerHTML = `${O.ru_texts} ${plural(O.ru_texts,'текст','текста','текстов')} в русском переводе и ${O.fr_texts} ${plural(O.fr_texts,'французский оригинал','французских оригинала','французских оригиналов')}, ${fmt(O.ru_words+O.fr_words)} ${plural(O.ru_words+O.fr_words,'слово','слова','слов')}, плюс интервью и эссе «о себе». `+
+$('#lede').innerHTML = `${O.ru_texts} ${plural(O.ru_texts, ['текст', 'текста', 'текстов'])} в русском переводе и ${O.fr_texts} ${plural(O.fr_texts, ['французский оригинал', 'французских оригинала', 'французских оригиналов'])}, ${fmt(O.ru_words+O.fr_words)} ${plural(O.ru_words+O.fr_words, ['слово', 'слова', 'слов'])}, плюс интервью и эссе «о себе». `+
   `Главное видно по оригиналам: <strong>под маской Эмиля Ажара Гари действительно писал другим голосом</strong> — «Жизнь впереди» отстоит от его романов дальше (${fmt2(F200.ajar_gary)}), чем два романа Гари друг от друга (${fmt2(F200.base[0])}). `+
   `А Фоско Синибальди по частым словам от Гари не отличить.`;
-const FIG=[[fmt(O.ru_texts),plural(O.ru_texts,'текст','текста','текстов')+' в русском переводе'],[fmt(Math.round(O.ru_words/1000))+' тыс.','слов в переводах'],[fmt(Math.round(O.fr_words/1000))+' тыс.','слов во французских оригиналах'],
-  ['4','подписи: Гари, Ажар, Богат, Синибальди'],[fmt(O.translators),plural(O.translators,'переводчик','переводчика','переводчиков')]];
+const FIG=[[fmt(O.ru_texts),plural(O.ru_texts, ['текст', 'текста', 'текстов'])+' в русском переводе'],[fmt(Math.round(O.ru_words/1000))+' тыс.','слов в переводах'],[fmt(Math.round(O.fr_words/1000))+' тыс.','слов во французских оригиналах'],
+  ['4','подписи: Гари, Ажар, Богат, Синибальди'],[fmt(O.translators),plural(O.translators, ['переводчик', 'переводчика', 'переводчиков'])]];
 $('#figures').innerHTML=FIG.map(([n,l])=>`<div class="fig"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
 
 /* листы: книги по годам, абзацы — штрихами */
@@ -82,13 +81,13 @@ function drawSheets(){
 function sheetAt(e){ const cv=$('#sheets-cv'); const r=cv.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top; return SH&&SH.boxes.find(b=>mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h); }
 $('#sheets-cv').addEventListener('pointermove',e=>{ const b=sheetAt(e); if(!b){ tip.hidden=true; return; } const a=A[b.i];
   const hl=hs.hl?lexBooks(hs.hl).get(a.i):null;
-  showTipHTML(`<b>${esc(T(a))}</b><br>${yr(a)} · ${SIGN[a.sign]||''} · ${LANG[a.lang]}<br>${fmt(a.words)} слов · диалог ${fmt1(a.dlg)}%${hl?`<br>«${esc(hs.hl)}»: ${hl} раз`:''}`,e.clientX,e.clientY); });
+  showTipHTML(`<b>${esc(T(a))}</b><br>${yr(a)} · ${SIGN[a.sign]||''} · ${LANG[a.lang]}<br>${pn(a.words,['слово','слова','слов'])} · диалог ${fmt1(a.dlg)}%${hl?`<br>«${esc(hs.hl)}»: ${pnr(hl,['раз','раза','раз'])}`:''}`,e.clientX,e.clientY); });
 $('#sheets-cv').addEventListener('pointerleave',()=>{ tip.hidden=true; });
 $('#sheets-cv').addEventListener('click',e=>{ const b=sheetAt(e); if(b){ selectBook(b.i,true); } });
 legendTo($('#sheets-legend'), SIGN_ITEMS.concat([['реплики диалога','var(--hmark)']]));
 chart(drawSheets, $('#sheets'));
 function setHL(k){ hs.hl = k&&LEX[k]?k:null; drawSheets();
-  const n=hs.hl?lexBooks(hs.hl).size:0; $('#hl-count').textContent = hs.hl?`«${hs.hl}»: ${fmt(LEX[hs.hl][0])} раз в ${n} книгах`:''; }
+  const n=hs.hl?lexBooks(hs.hl).size:0; $('#hl-count').textContent = hs.hl?`«${hs.hl}»: ${pn(LEX[hs.hl][0],['раз','раза','раз'])} в ${n} ${plural(n,['книге','книгах'])}`:''; }
 function sugg(q,n=8){ const k=norm(q); if(!k) return []; const out=[]; for(const key of LEXK){ if(key.startsWith(k)){ out.push(LEXN[key]); if(out.length>=n) break; } } return out; }
 const HL_EX=['слон','мать','клоун','собака','удав','смех','Морель','надежда','еврей','Франция'];
 function hlChips(list){ const h=$('#hl-chips'); h.innerHTML=''; list.forEach(k=>{ if(!LEX[k]) return; const b=document.createElement('button'); b.type='button'; b.className='chip'; b.textContent=k; b.addEventListener('click',()=>{ $('#hl-input').value=k; setHL(k); }); h.appendChild(b); }); }
@@ -108,14 +107,14 @@ const FIND=[
   [`${fmt1(fwar[0])} → ${fmt1(fwar[NPER-1])}`,'слов о войне на 1000 слов: от ранних книг (1937–1949) к поздним (1970–1980)'],
   [`${Math.round(100*V.night.bondy.words/(V.night.bondy.words+V.night.gary.words))}%`,'слов «Ночи будет спокойной» приходится на вопросы Франсуа Бонди, остальное — Гари'],
   [`${Math.round(ajFR.mattr)} против ${gFR.map(a=>Math.round(a.mattr)).join('–')}`,'разных слов на каждые 500: словарь Ажара беднее, чем у Гари, хотя фраза такой же длины'],
-  [`${esc(pn0[0])} — ${pn0[1]}`,`${plural(pn0[1],'книга','книги','книг')}, где назван ${esc(pn0[0])}: он чаще всех реальных людей появляется у Гари`]];
+  [`${esc(pn0[0])} — ${pn0[1]}`,`${plural(pn0[1], ['книга', 'книги', 'книг'])}, где назван ${esc(pn0[0])}: он чаще всех реальных людей появляется у Гари`]];
 $('#findings').innerHTML=FIND.map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('');
 $('#myths').innerHTML=D.myths.map(m=>`<article><p class="q">${esc(m.q)}</p>${verdictHTML(m.v)}<p class="num">${esc(m.num).replace(/(\d)\.(\d)/g,'$1,$2')}</p></article>`).join('');
 
 /* хронология */
 const EVENTS=[[1935,'гражданство Франции'],[1940,'к де Голлю'],[1945,'премия критиков'],[1956,'Гонкур'],[1961,'уход из дипломатии'],[1974,'первый Ажар'],[1975,'Гонкур Ажару'],[1980,'смерть']];
 const WORKS=D.works;
-$('#t-chrono').textContent=`В корпусе ${WORKS.length} ${plural(WORKS.length,'произведение','произведения','произведений')} от «Вина мертвецов» (написано в 1937-м, издано посмертно) до «Воздушных змеев» (1980). Больше всего книг вышло в 1962 году — это рассказы сборника «Слава нашим доблестным первопроходцам»: в корпусе ${WORKS.filter(w=>w.year===1962).length} из шестнадцати.`;
+$('#t-chrono').textContent=`В корпусе ${WORKS.length} ${plural(WORKS.length, ['произведение', 'произведения', 'произведений'])} от «Вина мертвецов» (написано в 1937-м, издано посмертно) до «Воздушных змеев» (1980). Больше всего книг вышло в 1962 году — это рассказы сборника «Слава нашим доблестным первопроходцам»: в корпусе ${WORKS.filter(w=>w.year===1962).length} из шестнадцати.`;
 legendTo($('#lg-chrono'), SIGN_ITEMS);
 chart(()=>{ const box=$('#c-chrono'); const h=250; const [s,w]=svg(box,h); const L=44,R=10,T0=46,B=26; const y0=1935,y1=1981;
   const sx=y=>L+(w-L-R)*(y-y0)/(y1-y0); const wk=WORKS.filter(x=>x.year).map(x=>({...x,a:A[x.ru!=null?x.ru:x.fr]}));
@@ -128,7 +127,7 @@ chart(()=>{ const box=$('#c-chrono'); const h=250; const [s,w]=svg(box,h); const
     const right=x+t.length*6+6<w; txt(s,right?x+3:x-3,T0-10+lv*12,t,{'text-anchor':right?'start':'end',style:'fill:var(--ink-2);font-size:10.5px'}); });
   const bw=Math.max(3,(w-L-R)/(y1-y0)-2);
   Object.entries(byY).forEach(([y,L_])=>{ let acc=0; L_.forEach(x=>{ const v=x.a.words/1000; const top=sy(acc+v), bot=sy(acc);
-    el('rect',{x:sx(+y)-bw/2,y:top,width:bw,height:Math.max(1,bot-top-1),fill:sc(x.sign),'data-tip':`<b>${esc(T(x.a))}</b><br>${y} · ${SIGN[x.sign]} · ${fmt(x.a.words)} слов${x.a.lang==='fr'?' (оригинал)':''}<br>нажмите — карточка ${y} года`,class:'clickable'},s)
+    el('rect',{x:sx(+y)-bw/2,y:top,width:bw,height:Math.max(1,bot-top-1),fill:sc(x.sign),'data-tip':`<b>${esc(T(x.a))}</b><br>${y} · ${SIGN[x.sign]} · ${pn(x.a.words,['слово','слова','слов'])}${x.a.lang==='fr'?' (оригинал)':''}<br>нажмите — карточка ${y} года`,class:'clickable'},s)
       .addEventListener('click',()=>yearCard(+y,true)); acc+=v; }); });
   el('line',{x1:L,x2:w-R,y1:h-B,y2:h-B,stroke:css('--axis')},s);
 }, $('#c-chrono'));
@@ -161,11 +160,11 @@ let slLang='ru';
 function drawFraza(){ const L=A.filter(a=>a.role==='own'&&a.lang===slLang&&a.year);
   $('#u-fraza').textContent = slLang==='ru'?'русские переводы: точка — медиана, отрезок — от 25% до 75% фраз':'французские оригиналы';
   scatterYear($('#c-fraza'), L.map(a=>({x:a.year+jitter(a.i),v:a.sl_med,q1:a.sl_q1,q3:a.sl_q3,c:sc(a.sign),lab:a.words>=10000?T(a):'',r:a.words>=10000?6:4,
-    tip:`<b>${esc(T(a))}</b>, ${a.year}<br>типичная фраза: ${fmt1(a.sl_med)} слов (${fmt1(a.sl_q1)}–${fmt1(a.sl_q3)})<br>перевод: ${esc(a.tr||'—')}`, onClick:()=>selectBook(a.i,true)})), {q:true, labelTop:3}); }
+    tip:`<b>${esc(T(a))}</b>, ${a.year}<br>типичная фраза: ${pn(a.sl_med,['слово','слова','слов'],1)} (${fmt1(a.sl_q1)}–${fmt1(a.sl_q3)})<br>перевод: ${esc(a.tr||'—')}`, onClick:()=>selectBook(a.i,true)})), {q:true, labelTop:3}); }
 seg($('#sl-lang'), [['ru','русские переводы'],['fr','оригиналы']], 'ru', v=>{ slLang=v; drawFraza(); });
 drawFraza();
 (()=>{ const B=RU_OWN.filter(a=>a.words>=10000); const mx=B.reduce((a,b)=>b.sl_med>a.sl_med?b:a), mn=B.reduce((a,b)=>b.sl_med<a.sl_med?b:a);
-  $('#f-fraza').textContent=`Самая длинная типичная фраза в книге ${TQ(mx)} (${fmt1(mx.sl_med)} слов), самая короткая — в книге ${TQ(mn)} (${fmt1(mn.sl_med)}). По-французски фраза длиннее: у трёх книг, которые есть на обоих языках, ${PR.map(p=>`${fmt1(p.sl[0])} → ${fmt1(p.sl[1])}`).join(', ')} слов (оригинал → перевод).`; })();
+  $('#f-fraza').textContent=`Самая длинная типичная фраза в книге ${TQ(mx)} (${pn(mx.sl_med,['слово','слова','слов'],1)}), самая короткая — в книге ${TQ(mn)} (${fmt1(mn.sl_med)}). По-французски фраза длиннее: у трёх книг, которые есть на обоих языках, ${PR.map(p=>`${fmt1(p.sl[0])} → ${fmt1(p.sl[1])}`).join(', ')} слов (оригинал → перевод).`; })();
 (()=>{ const B=RU_OWN.filter(big).sort((a,b)=>b.dlg-a.dlg);
   hbars($('#c-dialog'), B.map(a=>({l:`${TS(a)} · ${a.year||''}`,v:a.dlg,c:sc(a.sign),tip:`<b>${esc(T(a))}</b><br>${fmt1(a.dlg)}% слов в репликах<br>перевод: ${esc(a.tr||'—')}`,i:a.i})), {labelW:260, unit:'%', rowH:22, onClick:r=>selectBook(r.i,true)});
   const p=B[B.length-1];
@@ -190,12 +189,12 @@ let atSort='year';
 function drawAtlasList(){ const L=[...A]; if(atSort==='words') L.sort((a,b)=>b.words-a.words); else if(atSort==='dlg') L.sort((a,b)=>b.dlg-a.dlg); else if(atSort==='sl') L.sort((a,b)=>b.sl_med-a.sl_med);
   const key={year:'words',words:'words',dlg:'dlg',sl:'sl_med'}[atSort]; const u={year:'',words:'',dlg:'%',sl:''}[atSort];
   hbars($('#c-atlas'), L.map(a=>({l:`${TS(a)} · ${yr(a)}${a.lang==='fr'?' · фр.':''}`,v:key==='words'?a.words/1000:a[key],c:sc(a.sign),i:a.i,
-    tip:`<b>${esc(T(a))}</b> — ${key==='words'?fmt(a.words)+' слов':fmt1(a[key])+u}`})), {labelW:270, rowH:20, onClick:r=>selectBook(r.i,false), fmtv:key==='words'?v=>fmt(Math.round(v))+' т.':fmt1, unit:key==='words'?'':u}); }
+    tip:`<b>${esc(T(a))}</b> — ${key==='words'?pn(a.words,['слово','слова','слов']):fmt1(a[key])+u}`})), {labelW:270, rowH:20, onClick:r=>selectBook(r.i,false), fmtv:key==='words'?v=>fmt(Math.round(v))+' т.':fmt1, unit:key==='words'?'':u}); }
 seg($('#at-sort'), [['year','по годам'],['words','по объёму'],['sl','по фразе'],['dlg','по диалогу']], 'year', v=>{ atSort=v; drawAtlasList(); });
 drawAtlasList();
 function selectBook(i, scroll){ hs.sel=i; drawSheets(); const a=A[i]; const host=$('#card');
   const orig = a.lang==='ru' && RU_T[a.work] ? `<i>${esc(a.work)}</i>` : '';
-  const tiles=[[fmt(a.words),'слов'],[fmt1(a.sl_med),'слов в типичной фразе'],[fmt1(a.dlg)+'%','в репликах'],[fmt1(a.fp),'«я» на 1000 слов'],[a.mattr?Math.round(a.mattr):'—','разных слов на 500'],[fmt1(a.punct['!']),'«!» на 1000 слов']];
+  const tiles=[[fmt(a.words),plural(a.words,['слово','слова','слов'])],[fmt1(a.sl_med),plural(a.sl_med,['слово в типичной фразе','слова в типичной фразе','слов в типичной фразе'],1)],[fmt1(a.dlg)+'%','в репликах'],[fmt1(a.fp),'«я» на 1000 слов'],[a.mattr?Math.round(a.mattr):'—',a.mattr?plural(Math.round(a.mattr),['разное слово на 500','разных слова на 500','разных слов на 500']):'разных слов на 500'],[fmt1(a.punct['!']),'«!» на 1000 слов']];
   const chars=a.char.slice(0,12).map(([w,z])=>`<button type="button" class="chip" data-w="${esc(w)}">${esc(w)}</button>`).join('');
   const names=a.names.slice(0,8).map(([n,c])=>`${esc(n)} <span class="muted">${c}</span>`).join(' · ');
   let fl=''; if(a.fields && Object.keys(a.fields).length){ const avg=D.fields.per.reduce((acc,r)=>{ for(const k in r) acc[k]=(acc[k]||0)+r[k]/NPER; return acc; },{});
@@ -219,7 +218,7 @@ selectBook(A.findIndex(a=>a.work==="La Promesse de l'aube"&&a.lang==='ru'), fals
 
 /* ================= III. слова ================= */
 let twLang='ru', twPos='nouns';
-function drawTop(){ const L=D.top_words[twLang][twPos]; hbars($('#c-top'), L.slice(0,20).map(([w,n,r])=>({l:w,v:r,tip:`${esc(w)}: ${fmt(n)} раз, ${fmt1(r)} на 10 000`,w})), {labelW:120, rowH:22,
+function drawTop(){ const L=D.top_words[twLang][twPos]; hbars($('#c-top'), L.slice(0,20).map(([w,n,r])=>({l:w,v:r,tip:`${esc(w)}: ${pn(n,['раз','раза','раз'])}, ${fmt1(r)} на 10 000`,w})), {labelW:120, rowH:22,
   onClick:twLang==='ru'?(r=>{ const k=LEXN[norm(r.w)]; if(k) openWord(k,true); }):null}); }
 seg($('#tw-lang'), [['ru','переводы'],['fr','оригиналы']], 'ru', v=>{ twLang=v; drawTop(); });
 seg($('#tw-pos'), [['nouns','существительные'],['verbs','глаголы'],['adjs','прилагательные']], 'nouns', v=>{ twPos=v; drawTop(); });
@@ -233,11 +232,11 @@ function openWord(k, scroll){ $('#x-input').value=k; renderWord(k); if(scroll) d
 function renderWord(k, hl){ const L=LEX[k]; if(!L) return; const [tot,per,sg,bk,ex]=L; const PT=D.per_tokens; const ST=D.sign_tokens;
   const rates=per.map((n,j)=>10000*n/PT[j]); const sr=['Гари','Ажар','Шатан Богат'].map((s,j)=>[s,10000*sg[j]/ST[s]]);
   const nb=bk.length/2;
-  $('#x-out').innerHTML=`<div class="big">${esc(k)}</div><p class="count">${fmt(tot)} раз в ${nb} книгах из ${RU_OWN.length}</p>
+  $('#x-out').innerHTML=`<div class="big">${esc(k)}</div><p class="count">${pn(tot,['раз','раза','раз'])} в ${nb} ${plural(nb,['книге','книгах'])} из ${RU_OWN.length}</p>
     <div class="chart" id="c-xper"></div>
     <div class="mini" style="margin-top:8px">${sr.map(([s,r])=>`<span>${s}: ${fmt1(r)} на 10 000</span><span class="bars"><i style="width:${Math.min(100,100*r/Math.max(...sr.map(x=>x[1]),1e-9))}%;background:${sc(Object.keys(SIGN).find(x=>SIGN[x].includes(s.split(' ')[0])))}"></i></span>`).join('')}</div>
     ${ex?`<blockquote>${esc(ex[0])}<cite>${esc(T(A[ex[1]]))}</cite></blockquote>`:''}`;
-  vbars($('#c-xper'), rates.map((v,j)=>({l:PER[j],v,tip:`${PER[j]}: ${fmt1(v)} на 10 000 (${per[j]} раз)`})), {h:150, fmtv:fmt1});
+  vbars($('#c-xper'), rates.map((v,j)=>({l:PER[j],v,tip:`${PER[j]}: ${fmt1(v)} на 10 000 (${pnr(per[j],['раз','раза','раз'])})`})), {h:150, fmtv:fmt1});
   const rows=[]; for(let i=0;i<bk.length;i+=2) rows.push({l:`${TS(A[bk[i]],22)} · ${A[bk[i]].year||''}`,v:bk[i+1],c:sc(A[bk[i]].sign),i:bk[i]});
   $('#x-t2').textContent=`Где встречается «${k}»`;
   hbars($('#c-xbooks'), rows.slice(0,18), {labelW:190, rowH:21, onClick:r=>selectBook(r.i,true), fmtv:fmt});
@@ -245,7 +244,7 @@ function renderWord(k, hl){ const L=LEX[k]; if(!L) return; const [tot,per,sg,bk,
 renderWord(LEX['слон']?'слон':Object.keys(LEX)[0], false);
 
 $('#eras').innerHTML=D.eras.map(e=>{ const mx=Math.max(...e.top.map(t=>t[1])); return `<div class="era"><div class="h"><b>${e.p}</b><span>${e.books} кн. · ${esc(e.note)}</span></div><ul class="wl">${
-  e.top.slice(0,14).map(([w,z,n,nb])=>`<li><button type="button" data-w="${esc(w)}" data-tip="${esc(w)}: ${n} раз, в ${nb} книгах периода">${esc(w)} <span class="muted">(${nb})</span></button><span class="bar" style="width:${Math.round(84*z/mx)}px"></span></li>`).join('')}</ul></div>`; }).join('');
+  e.top.slice(0,14).map(([w,z,n,nb])=>`<li><button type="button" data-w="${esc(w)}" data-tip="${esc(w)}: ${pnr(n,['раз','раза','раз'])}, в ${nb} ${plural(nb,['книге','книгах'])} периода">${esc(w)} <span class="muted">(${nb})</span></button><span class="bar" style="width:${Math.round(84*z/mx)}px"></span></li>`).join('')}</ul></div>`; }).join('');
 $('#eras').querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('click',()=>{ const k=LEXN[norm(b.dataset.w)]; if(k) openWord(k,true); }));
 
 const FN=D.fields.names; let flMode='per', flDrill=FN.indexOf('Звери');
@@ -320,7 +319,7 @@ function strip(box, groups){ return chart(()=>{ const rowH=34, labelW=Math.min(2
     {l:'Поздний Гари ↔ поздний Гари',v:gv,t:gt,c:'var(--s1)'},{l:'Шатан Богат ↔ поздний Гари',v:bv,t:bt,c:'var(--c3)'},
     {l:'Ажар ↔ поздний Гари',v:av,t:at,c:'var(--s2)'},{l:'Ажар ↔ Ажар',v:aav,t:aat,c:'var(--s2)'},
     {l:'Мавлевич: Гари ↔ Гари',v:mgv.filter(x=>x),t:mgt,c:'var(--g6)'},{l:'Мавлевич: Ажар ↔ Гари',v:mav,t:mat,c:'var(--g8)'}]);
-  $('#n-shum').textContent=`Черта — медиана группы. Два перевода одной книги расходятся на ${fmt2(RS.noise.min)}–${fmt2(RS.noise.max)}: это шум перевода. Книги позднего Гари между собой — ${fmt2(RS.gg_late.min)}–${fmt2(RS.gg_late.max)}, Ажар от позднего Гари — ${fmt2(RS.ajar_late.min)}–${fmt2(RS.ajar_late.max)}. У одной переводчицы, Натальи Мавлевич, «Голубчик» отстоит от её переводов Гари на ${fmt2(RS.mav.ga.min)}–${fmt2(RS.mav.ga.max)}, а её переводы Гари друг от друга — на ${fmt2(RS.mav.gg.min)}–${fmt2(RS.mav.gg.max)}: диапазоны ${RS.mav.ga.max<=RS.mav.gg.max?'перекрываются':'почти не перекрываются'}. Это одна книга Ажара и ${RS.mav.gary.length} книги Гари — мало для вывода.`;
+  $('#n-shum').textContent=`Черта — медиана группы. Два перевода одной книги расходятся на ${fmt2(RS.noise.min)}–${fmt2(RS.noise.max)}: это шум перевода. Книги позднего Гари между собой — ${fmt2(RS.gg_late.min)}–${fmt2(RS.gg_late.max)}, Ажар от позднего Гари — ${fmt2(RS.ajar_late.min)}–${fmt2(RS.ajar_late.max)}. У одной переводчицы, Натальи Мавлевич, «Голубчик» отстоит от её переводов Гари на ${fmt2(RS.mav.ga.min)}–${fmt2(RS.mav.ga.max)}, а её переводы Гари друг от друга — на ${fmt2(RS.mav.gg.min)}–${fmt2(RS.mav.gg.max)}: диапазоны ${RS.mav.ga.max<=RS.mav.gg.max?'перекрываются':'почти не перекрываются'}. Это одна книга Ажара и ${pnr(RS.mav.gary.length,['книга','книги','книг'])} Гари — мало для вывода.`;
   const mavIn = RS.mav.ga.max<=RS.mav.gg.max;
   const TC=V.translation_check; const TCv=Object.values(TC); const same=TCv.filter(x=>x.same_order).length; const pass=same===TCv.length;
   const nearOk=TCv.every(x=>x.ru && x.fr.indexOf(Math.min(...x.fr))===0 && x.ru.indexOf(Math.min(...x.ru))===0);
@@ -331,7 +330,7 @@ function strip(box, groups){ return chart(()=>{ const rowH=34, labelW=Math.min(2
     : `По-русски Ажар в среднем дальше от позднего Гари (${fmt2(RS.ajar_late.med)}), чем два перевода одной книги друг от друга (${fmt2(RS.noise.med)}). ${mavIn?'Но у одного и того же переводчика «Голубчик» не выходит за разброс между книгами Гари. ':''}По русским текстам голос Ажара нельзя отделить от голоса его переводчиков — ответ на вопрос о голосе дают только оригиналы.`;
   $('#w-check').innerHTML = pass
     ? `<b>Проверка перевода пройдена.</b> Три книги есть на обоих языках, и порядок трёх расстояний между ними совпадает во французском и в русском при 100, 200 и 300 частых словах. Поэтому русское сравнение получает вердикт по тому же правилу, что и французское. Проверка хрупкая: две дальние пары по-русски различаются всего на ${fmt2(gap)}, так что русский вердикт слабее французского.`
-    : `<b>Проверка перевода.</b> Три книги есть на обоих языках. ${nearOk?'Самая близкая пара — «Обещание» и «Корни неба» — совпадает в обоих языках при любом числе частых слов. Но п':'П'}орядок всех трёх расстояний перевод сохраняет только в ${same} варианте из ${TCv.length}. По правилу, заданному заранее, по русским переводам вердиктов о голосе не ставится: эта часть описательная, вердикт даёт только сравнение оригиналов.`;
+    : `<b>Проверка перевода.</b> Три книги есть на обоих языках. ${nearOk?'Самая близкая пара — «Обещание» и «Корни неба» — совпадает в обоих языках при любом числе частых слов. Но п':'П'}орядок всех трёх расстояний перевод сохраняет только в ${same} ${plural(same,['варианте','вариантах'])} из ${TCv.length}. По правилу, заданному заранее, по русским переводам вердиктов о голосе не ставится: эта часть описательная, вердикт даёт только сравнение оригиналов.`;
   // переводчик или годы
   const P=RS.pairs; const col=s=>s===true?'var(--s2)':s===false?'var(--s1)':'var(--neutral-bar)';
   legendTo($('#lg-pairs'), [['один переводчик','var(--s2)'],['разные переводчики','var(--s1)'],['переводчик неизвестен','var(--neutral-bar)']]);
@@ -340,23 +339,23 @@ function strip(box, groups){ return chart(()=>{ const rowH=34, labelW=Math.min(2
     const sx=x=>L+(w-L-R)*x/gx, sy=v=>h-B-(h-B-T0)*(v-lo)/(hi-lo); const ax=el('g',{class:'ax'},s);
     for(let k=0;k<=4;k++){ const v=lo+(hi-lo)*k/4; el('line',{x1:L,x2:w-R,y1:sy(v),y2:sy(v),stroke:css('--grid')},ax); txt(ax,L-6,sy(v)+4,fmt2(v),{'text-anchor':'end'}); }
     for(let x=0;x<=gx;x+=10) txt(ax,sx(x),h-8,x+' лет',{'text-anchor':'middle'});
-    P.forEach(p=>el('circle',{cx:sx(p[3]),cy:sy(p[2]),r:p[4]===true?5.5:3.6,fill:col(p[4]),opacity:p[4]===true?.95:.55,'data-tip':`${esc(tt(p[0]))} ↔ ${esc(tt(p[1]))}<br>${p[3]} лет, дельта ${fmt2(p[2])}`},s));
+    P.forEach(p=>el('circle',{cx:sx(p[3]),cy:sy(p[2]),r:p[4]===true?5.5:3.6,fill:col(p[4]),opacity:p[4]===true?.95:.55,'data-tip':`${esc(tt(p[0]))} ↔ ${esc(tt(p[1]))}<br>${pnr(p[3],['год','года','лет'])}, дельта ${fmt2(p[2])}`},s));
   }, $('#c-pairs'));
   const grp=f=>{ const v=P.filter(f).map(p=>p[2]); return {n:v.length, m:v.reduce((a,b)=>a+b,0)/Math.max(1,v.length)}; };
   const sameT=grp(p=>p[4]===true), diffT=grp(p=>p[4]===false), unk=grp(p=>p[4]===null); const near=grp(p=>p[3]<=5&&p[4]!==true), far=grp(p=>p[3]>=20&&p[4]!==true);
-  $('#n-pairs').textContent=`Пар книг одного переводчика в корпусе ${sameT.n}${sameT.n<3?' — слишком мало, чтобы сравнивать переводчиков между собой':`: в среднем ${fmt2(sameT.m)} против ${fmt2(diffT.m)} у разных`}; у ${unk.n} пар переводчик хотя бы одной книги неизвестен. Время заметно сильнее: книги, написанные с разницей до пяти лет, в среднем на ${fmt2(near.m)} (${near.n} пар), с разницей от двадцати лет — на ${fmt2(far.m)} (${far.n} пар).`; })();
+  $('#n-pairs').textContent=`Пар книг одного переводчика в корпусе ${sameT.n}${sameT.n<3?' — слишком мало, чтобы сравнивать переводчиков между собой':`: в среднем ${fmt2(sameT.m)} против ${fmt2(diffT.m)} у разных`}; у ${unk.n} ${plural(unk.n,['пары','пар'])} переводчик хотя бы одной книги неизвестен. Время заметно сильнее: книги, написанные с разницей до пяти лет, в среднем на ${fmt2(near.m)} (${pnr(near.n,['пара','пары','пар'])}), с разницей от двадцати лет — на ${fmt2(far.m)} (${pnr(far.n,['пара','пары','пар'])}).`; })();
 
 /* «Ночь будет спокойной» */
 (()=>{ const N=V.night; const g=N.gary, b=N.bondy; const tot=g.words+b.words;
-  $('#noch-vs').innerHTML=[[`${Math.round(100*b.words/tot)}%`,'слов книги — вопросы Бонди',`${fmt(b.paras)} реплик, типичная — ${fmt1(b.len_med)} слов`,'var(--c3)'],
-    [`${Math.round(100*g.words/tot)}%`,'слов — ответы Гари',`${fmt(g.paras)} реплик, типичная — ${fmt1(g.len_med)} слов, самая длинная — ${fmt(g.len_max)}`,'var(--s1)'],
+  $('#noch-vs').innerHTML=[[`${Math.round(100*b.words/tot)}%`,'слов книги — вопросы Бонди',`${pn(b.paras,['реплика','реплики','реплик'])}, типичная — ${pn(b.len_med,['слово','слова','слов'],1)}`,'var(--c3)'],
+    [`${Math.round(100*g.words/tot)}%`,'слов — ответы Гари',`${pn(g.paras,['реплика','реплики','реплик'])}, типичная — ${pn(g.len_med,['слово','слова','слов'],1)}, самая длинная — ${fmt(g.len_max)}`,'var(--s1)'],
     [`${fmt1(1000*b.ty/b.words)} и ${fmt1(1000*g.ty/g.words)}`,'«ты» на 1000 слов: у Бонди и у Гари','вопросы обращены к собеседнику, ответы — к читателю','var(--ink)'],
     [`${fmt1(1000*g.ya/g.words)} и ${fmt1(1000*b.ya/b.words)}`,'«я» на 1000 слов: у Гари и у Бонди','книга о себе — в ответах, а не в вопросах','var(--ink)']]
     .map(([n,h,s,c])=>`<div class="box"><h3>${h}</h3><div class="big" style="color:${c}">${n}</div><div class="sub">${s}</div></div>`).join('');
-  $('#f-noch').textContent=`Разговор вдвоём здесь только по форме: Бонди принадлежит ${Math.round(100*b.words/tot)}% слов, его типичная реплика — ${fmt1(b.len_med)} слов, типичный ответ Гари — ${fmt1(g.len_med)}. Кто писал вопросы, по частым словам не проверить: вопрос и ответ — разные жанры речи, и расстояние между ними покажет разницу жанров, а не авторов.`;
+  $('#f-noch').textContent=`Разговор вдвоём здесь только по форме: Бонди принадлежит ${Math.round(100*b.words/tot)}% слов, его типичная реплика — ${pn(b.len_med,['слово','слова','слов'],1)}, типичный ответ Гари — ${fmt1(g.len_med)}. Кто писал вопросы, по частым словам не проверить: вопрос и ответ — разные жанры речи, и расстояние между ними покажет разницу жанров, а не авторов.`;
   chart(()=>{ const box=$('#c-noch'); const S=N.seq; const h=96; const [s,w]=svg(box,h); const L=58,R=4; const tot=S.reduce((a,x)=>a+x[0],0); const sx=v=>L+(w-L-R)*v/tot;
     const lanes=[['Бонди',1,10,'var(--c3)'],['Гари',0,46,'var(--s1)']]; lanes.forEach(([n,k,y])=>txt(s,L-8,y+14,n,{'text-anchor':'end',style:'font-family:var(--f-mono);font-size:11.5px;fill:var(--ink-2)'}));
-    let acc=0; S.forEach(([n,k])=>{ const [,,y,c]=lanes[k?0:1]; el('rect',{x:sx(acc),y,width:Math.max(.6,sx(acc+n)-sx(acc)-.3),height:22,fill:c,'data-tip':`${k?'Бонди':'Гари'}: ${n} слов`},s); acc+=n; });
+    let acc=0; S.forEach(([n,k])=>{ const [,,y,c]=lanes[k?0:1]; el('rect',{x:sx(acc),y,width:Math.max(.6,sx(acc+n)-sx(acc)-.3),height:22,fill:c,'data-tip':`${k?'Бонди':'Гари'}: ${pnr(n,['слово','слова','слов'])}`},s); acc+=n; });
     const ax=el('g',{class:'ax'},s); txt(ax,L,h-6,'начало книги'); txt(ax,w-R,h-6,'конец',{'text-anchor':'end'});
   }, $('#c-noch'));
   $('#noch-q').innerHTML=N.examples_q.map(q=>`<p><span class="who">Бонди</span>${esc(q)}</p>`).join(''); })();
@@ -384,24 +383,24 @@ function listCard(host, title, sub, books, ex){ const mx=Math.max(...books.map(x
   host.querySelectorAll('button[data-open]').forEach(x=>x.addEventListener('click',()=>openWord(x.dataset.open,true)));
   host.querySelectorAll('button[data-net]').forEach(x=>x.addEventListener('click',()=>{ ntSelectByName(x.dataset.net); goTo('krug'); }));
   host.querySelectorAll('button[data-b]').forEach(x=>x.addEventListener('click',()=>selectBook(+x.dataset.b,true))); }
-(()=>{ const P=D.pantheon; hbars($('#c-panteon'), P.slice(0,30).map(r=>({l:r[0],v:r[1],r,tip:`${esc(r[0])}: ${r[1]} книг, ${r[2]} упоминаний`})), {labelW:140, rowH:21, fmtv:fmt, onClick:x=>listCard($('#pn-card'),x.r[0],`${x.r[1]} книг · ${x.r[2]} упоминаний`,x.r[3])});
-  listCard($('#pn-card'),P[0][0],`${P[0][1]} книг · ${P[0][2]} упоминаний`,P[0][3]);
-  $('#f-panteon').textContent=`Чаще всех реальных людей у Гари появляются ${P.slice(0,5).map(r=>`${r[0]} (${r[1]} книг)`).join(', ')}. Диктаторы и святые, писатели и художники стоят в одном списке: ${P.slice(5,12).map(r=>r[0]).join(', ')}.`; })();
-(()=>{ const P=D.places; hbars($('#c-mesta'), P.slice(0,30).map(r=>({l:r[0],v:r[1],r,tip:`${esc(r[0])}: ${r[1]} книг, ${r[2]} упоминаний`})), {labelW:130, rowH:21, fmtv:fmt, onClick:x=>listCard($('#ms-card'),x.r[0],`${x.r[1]} книг · ${x.r[2]} упоминаний`,x.r[3])});
-  listCard($('#ms-card'),P[0][0],`${P[0][1]} книг · ${P[0][2]} упоминаний`,P[0][3]);
-  $('#f-mesta').textContent=`${P[0][0]} и ${P[1][0]} названы в ${P[0][1]} и ${P[1][1]} книгах из ${RU_OWN.length}, но мир Гари шире Европы: Африка — в ${(P.find(r=>r[0]==='Африка')||[0,0])[1]} книгах, Америка — в ${(P.find(r=>r[0]==='Америка')||[0,0])[1]}, Россия — в ${(P.find(r=>r[0]==='Россия')||[0,0])[1]}.`; })();
+(()=>{ const P=D.pantheon; hbars($('#c-panteon'), P.slice(0,30).map(r=>({l:r[0],v:r[1],r,tip:`${esc(r[0])}: ${pnr(r[1],['книга','книги','книг'])}, ${pnr(r[2],['упоминание','упоминания','упоминаний'])}`})), {labelW:140, rowH:21, fmtv:fmt, onClick:x=>listCard($('#pn-card'),x.r[0],`${pnr(x.r[1],['книга','книги','книг'])} · ${pnr(x.r[2],['упоминание','упоминания','упоминаний'])}`,x.r[3])});
+  listCard($('#pn-card'),P[0][0],`${pnr(P[0][1],['книга','книги','книг'])} · ${pnr(P[0][2],['упоминание','упоминания','упоминаний'])}`,P[0][3]);
+  $('#f-panteon').textContent=`Чаще всех реальных людей у Гари появляются ${P.slice(0,5).map(r=>`${r[0]} (${pnr(r[1],['книга','книги','книг'])})`).join(', ')}. Диктаторы и святые, писатели и художники стоят в одном списке: ${P.slice(5,12).map(r=>r[0]).join(', ')}.`; })();
+(()=>{ const P=D.places; hbars($('#c-mesta'), P.slice(0,30).map(r=>({l:r[0],v:r[1],r,tip:`${esc(r[0])}: ${pnr(r[1],['книга','книги','книг'])}, ${pnr(r[2],['упоминание','упоминания','упоминаний'])}`})), {labelW:130, rowH:21, fmtv:fmt, onClick:x=>listCard($('#ms-card'),x.r[0],`${pnr(x.r[1],['книга','книги','книг'])} · ${pnr(x.r[2],['упоминание','упоминания','упоминаний'])}`,x.r[3])});
+  listCard($('#ms-card'),P[0][0],`${pnr(P[0][1],['книга','книги','книг'])} · ${pnr(P[0][2],['упоминание','упоминания','упоминаний'])}`,P[0][3]);
+  $('#f-mesta').textContent=`${P[0][0]} и ${P[1][0]} названы в ${P[0][1]} и ${P[1][1]} ${plural(P[1][1],['книге','книгах'])} из ${RU_OWN.length}, но мир Гари шире Европы: Африка — в ${pnr((P.find(r=>r[0]==='Африка')||[0,0])[1],['книге','книгах'])}, Америка — в ${(P.find(r=>r[0]==='Америка')||[0,0])[1]}, Россия — в ${(P.find(r=>r[0]==='Россия')||[0,0])[1]}.`; })();
 const SHV=D.shelves;
-(()=>{ const Z=SHV['Звери']; hbars($('#c-zveri'), Z.slice(0,24).map(r=>({l:r[0],v:r[2],r,tip:`${esc(r[0])}: ${r[2]} раз в ${r[1]} книгах`})), {labelW:110, rowH:21, fmtv:fmt, onClick:x=>listCard($('#zv-card'),x.r[0],`${x.r[2]} раз · ${x.r[1]} книг`,x.r[3],x.r[4])});
-  listCard($('#zv-card'),Z[0][0],`${Z[0][2]} раз · ${Z[0][1]} книг`,Z[0][3],Z[0][4]);
+(()=>{ const Z=SHV['Звери']; hbars($('#c-zveri'), Z.slice(0,24).map(r=>({l:r[0],v:r[2],r,tip:`${esc(r[0])}: ${pnr(r[2],['раз','раза','раз'])} в ${r[1]} ${plural(r[1],['книге','книгах'])}`})), {labelW:110, rowH:21, fmtv:fmt, onClick:x=>listCard($('#zv-card'),x.r[0],`${pnr(x.r[2],['раз','раза','раз'])} · ${pnr(x.r[1],['книга','книги','книг'])}`,x.r[3],x.r[4])});
+  listCard($('#zv-card'),Z[0][0],`${pnr(Z[0][2],['раз','раза','раз'])} · ${pnr(Z[0][1],['книга','книги','книг'])}`,Z[0][3],Z[0][4]);
   const dog=Z.find(r=>r[0]==='собака'), boa=Z.find(r=>r[0]==='удав');
   const inBook=(r,f)=>r[3].filter(([b])=>f(A[b])).reduce((a,[,n])=>a+n,0);
   const slR=inBook(Z[0],a=>a.work==='Les Racines du ciel'), boaA=inBook(boa,a=>a.sign==='Émile Ajar');
-  $('#f-zveri').textContent=`Главный зверь Гари — ${Z[0][0]}: ${Z[0][2]} упоминаний, из них ${slR} (${Math.round(100*slR/Z[0][2])}%) в «Корнях неба». По числу книг впереди собака — ${dog[1]} книг из ${RU_OWN.length}, больше всего в «Белой собаке». Удав упомянут ${boa[2]} раз, ${Math.round(100*boaA/boa[2])}% — у Ажара: это Голубчик из одноимённого романа.`; })();
+  $('#f-zveri').textContent=`Главный зверь Гари — ${Z[0][0]}: ${pnr(Z[0][2],['упоминание','упоминания','упоминаний'])}, из них ${slR} (${Math.round(100*slR/Z[0][2])}%) в «Корнях неба». По числу книг впереди собака — ${pnr(dog[1],['книга','книги','книг'])} из ${RU_OWN.length}, больше всего в «Белой собаке». Удав упомянут ${pnr(boa[2],['раз','раза','раз'])}, ${Math.round(100*boaA/boa[2])}% — у Ажара: это Голубчик из одноимённого романа.`; })();
 (()=>{ const host=$('#shelves'); const keys=['Напитки','Транспорт','Оружие']; const cols={Напитки:'var(--g7)',Транспорт:'var(--g2)',Оружие:'var(--g1)'};
   host.innerHTML=keys.map(k=>{ const L=SHV[k]; const mx=Math.max(...L.map(r=>r[2])); return `<div class="sh-group"><div class="sh-h"><i class="sw" style="background:${cols[k]}"></i><b>${k}</b><span class="muted">${fmt(L.reduce((a,r)=>a+r[2],0))}</span></div><ul class="sh-list">${
     L.slice(0,12).map((r,j)=>`<li><button type="button" data-k="${k}" data-j="${j}">${esc(r[0])}</button><span class="b"><i style="width:${Math.round(100*r[2]/mx)}%;background:${cols[k]}"></i></span><span class="n">${r[2]}</span></li>`).join('')}</ul></div>`; }).join('');
-  host.querySelectorAll('button[data-k]').forEach(b=>b.addEventListener('click',()=>{ const r=SHV[b.dataset.k][+b.dataset.j]; listCard($('#sh-card'),r[0],`${r[2]} раз · ${r[1]} книг`,r[3],r[4]); }));
-  const r=SHV['Напитки'][0]; listCard($('#sh-card'),r[0],`${r[2]} раз · ${r[1]} книг`,r[3],r[4]); })();
+  host.querySelectorAll('button[data-k]').forEach(b=>b.addEventListener('click',()=>{ const r=SHV[b.dataset.k][+b.dataset.j]; listCard($('#sh-card'),r[0],`${pnr(r[2],['раз','раза','раз'])} · ${pnr(r[1],['книга','книги','книг'])}`,r[3],r[4]); }));
+  const r=SHV['Напитки'][0]; listCard($('#sh-card'),r[0],`${pnr(r[2],['раз','раза','раз'])} · ${pnr(r[1],['книга','книги','книг'])}`,r[3],r[4]); })();
 
 /* ================= VI. оригинал и перевод ================= */
 (()=>{ const rows=[['слов','words',fmt],['фраз','sents',fmt],['слов в типичной фразе','sl',fmt1],['% слов в репликах','dlg',fmt1],['«!» на 1000 слов','excl',fmt1],['«?» на 1000 слов','q',fmt1],['«…» на 1000 слов','ell',fmt1],['«я» на 1000 слов','fp',fmt1]];
@@ -418,11 +417,11 @@ const SHV=D.shelves;
 
 /* ================= VII. рекорды, корпус, методика ================= */
 (()=>{ const R=D.records; const card=(k,i,d)=>`<div class="rec"><div class="k">${k}</div><div class="v">${esc(T(A[i]))}</div><div class="d">${d}</div></div>`;
-  $('#records').innerHTML=[card('Самая большая книга',R.biggest,`${fmt(A[R.biggest].words)} слов в переводе`),card('Больше всего диалога',R.most_dialog,`${fmt1(A[R.most_dialog].dlg)}% слов в репликах`),
+  $('#records').innerHTML=[card('Самая большая книга',R.biggest,`${pn(A[R.biggest].words,['слово','слова','слов'])} в переводе`),card('Больше всего диалога',R.most_dialog,`${fmt1(A[R.most_dialog].dlg)}% слов в репликах`),
     card('Меньше всего диалога',R.least_dialog,`${fmt1(A[R.least_dialog].dlg)}% слов в репликах`),card('Больше всего «!»',R.most_excl,`${fmt1(A[R.most_excl].punct['!'])} на 1000 слов`),
     card('Больше всего «?»',R.most_q,`${fmt1(A[R.most_q].punct['?'])} на 1000 слов`),card('Больше всего «я»',R.most_fp,`${fmt1(A[R.most_fp].fp)} на 1000 слов`),
-    card('Самая длинная типичная фраза',R.longest_sl,`${fmt1(A[R.longest_sl].sl_med)} слов`),card('Богаче всего словарь',R.richest,`${Math.round(A[R.richest].mattr)} разных слов на 500`),card('Самая короткая типичная фраза',R.shortest_sl,`${fmt1(A[R.shortest_sl].sl_med)} слов`)].join('');
-  $('#longest-ru').innerHTML=`${esc(R.longest_ru[1])}…<cite>${R.longest_ru[0]} слов · «${esc(RU_T[R.longest_ru[2]]||R.longest_ru[2])}», русский перевод</cite>`;
+    card('Самая длинная типичная фраза',R.longest_sl,`${pn(A[R.longest_sl].sl_med,['слово','слова','слов'],1)}`),card('Богаче всего словарь',R.richest,`${pnr(Math.round(A[R.richest].mattr),['разное слово','разных слова','разных слов'])} на 500`),card('Самая короткая типичная фраза',R.shortest_sl,`${pn(A[R.shortest_sl].sl_med,['слово','слова','слов'],1)}`)].join('');
+  $('#longest-ru').innerHTML=`${esc(R.longest_ru[1])}…<cite>${pnr(R.longest_ru[0],['слово','слова','слов'])} · «${esc(RU_T[R.longest_ru[2]]||R.longest_ru[2])}», русский перевод</cite>`;
   $('#longest-fr').innerHTML=`${esc(R.longest_fr[1])}…<cite>${R.longest_fr[0]} mots · «${esc(R.longest_fr[2])}», оригинал</cite>`; })();
 (()=>{ const rows=A.map(a=>[T(a), a.lang==='ru'&&RU_T[a.work]?a.work:'', String(a.year||'—'), SIGN[a.sign]||'', a.lang==='ru'?(a.tr||'нет данных'):'оригинал', fmt(a.words)]);
   $('#t-corpus').innerHTML=`<table><thead><tr><th>Книга</th><th>Оригинал</th><th>Год</th><th>Подпись</th><th>Перевод</th><th>Слов</th></tr></thead><tbody>${rows.map(r=>'<tr>'+r.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>').join('')}</tbody></table>`; })();

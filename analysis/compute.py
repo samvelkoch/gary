@@ -12,6 +12,17 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).parent
+
+
+def plural(n, forms):
+    """1, 21… → forms[0]; 2–4, 22–24… → forms[1]; остальные и 11–14 → forms[2]. Две формы (ед., мн.) — для косвенных падежей."""
+    n = abs(int(round(n)))
+    m10, m100 = n % 10, n % 100
+    if m10 == 1 and m100 != 11:
+        return forms[0]
+    if len(forms) == 2:
+        return forms[1]
+    return forms[1] if 2 <= m10 <= 4 and not 12 <= m100 <= 14 else forms[2]
 PERIODS = [("1937–1949", 1937, 1949), ("1952–1962", 1952, 1962), ("1963–1969", 1963, 1969), ("1970–1980", 1970, 1981)]
 PER_NOTE = ["юность, война, первые романы", "дипломат, Гонкур за «Корни неба»", "Америка, Джин Сиберг, «Брат Океан»", "поздний Гари и Эмиль Ажар"]
 SIGN_RU = {"Gary": "Гари", "Émile Ajar": "Ажар", "Shatan Bogat": "Шатан Богат", "Fosco Sinibaldi": "Фоско Синибальди"}
@@ -419,7 +430,7 @@ def main():
     ratio = mom(pr) / med_mom
     myths.append({"id": "mother", "q": "«Обещание на рассвете» — книга о матери",
                   "v": "yes" if ratio >= 3 else "part" if ratio >= 1.5 else "no",
-                  "num": f"Слова «мать», «мама», «матушка»: {mom(pr):.1f} на 1000 слов в «Обещании» против {med_mom:.1f} в типичной книге Гари — в {ratio:.0f} раз чаще."})
+                  "num": f"Слова «мать», «мама», «матушка»: {mom(pr):.1f} на 1000 слов в «Обещании» против {med_mom:.1f} в типичной книге Гари — в {ratio:.0f} {plural(ratio, ('раз', 'раза', 'раз'))} чаще."})
     war = [fields_per[j]["Война"] for j in range(len(PERIODS))]
     myths.append({"id": "war", "q": "Гари — прежде всего писатель войны",
                   "v": "part" if max(war) >= 1.5 * min(war) and war.index(max(war)) == 0 else ("yes" if min(war) >= 3 else "no"),
@@ -431,7 +442,7 @@ def main():
     g_sl = ", ".join(f"{a['sl_med']:.0f}" for a in gf); g_mt = ", ".join(f"{a['mattr']:.0f}" for a in gf)
     myths.append({"id": "simple", "q": "Ажар пишет проще: короче фразы, беднее словарь",
                   "v": "yes" if sl_ratio <= 0.8 and mt_lower else ("part" if sl_ratio <= 0.9 or mt_lower else "no"),
-                  "num": f"По-французски: типичная фраза «Жизни впереди» — {ajf['sl_med']:.0f} слов, у Гари — {g_sl}. "
+                  "num": f"По-французски: типичная фраза «Жизни впереди» — {ajf['sl_med']:.0f} {plural(ajf['sl_med'], ('слово', 'слова', 'слов'))}, у Гари — {g_sl}. "
                          f"Разных слов на 500: {ajf['mattr']:.0f} против {g_mt}."})
     S = V["ru"]["summary"]["narr"]["200"]
     mv = S["mav"]
@@ -442,8 +453,8 @@ def main():
     nb = V["night"]
     myths.append({"id": "night", "q": "«Ночь будет спокойной» — разговор двоих",
                   "v": "none",
-                  "num": f"Бонди принадлежит {100 * nb['bondy']['words'] / (nb['bondy']['words'] + nb['gary']['words']):.0f}% слов книги: {nb['bondy']['paras']} реплик, "
-                         f"типичная — {nb['bondy']['len_med']:.0f} слов. У Гари типичный ответ — {nb['gary']['len_med']:.0f} слов, самый длинный — {nb['gary']['len_max']}. "
+                  "num": f"Бонди принадлежит {100 * nb['bondy']['words'] / (nb['bondy']['words'] + nb['gary']['words']):.0f}% слов книги: {nb['bondy']['paras']} {plural(nb['bondy']['paras'], ('реплика', 'реплики', 'реплик'))}, "
+                         f"типичная — {nb['bondy']['len_med']:.0f} {plural(nb['bondy']['len_med'], ('слово', 'слова', 'слов'))}. У Гари типичный ответ — {nb['gary']['len_med']:.0f} {plural(nb['gary']['len_med'], ('слово', 'слова', 'слов'))}, самый длинный — {nb['gary']['len_max']}. "
                          f"Кто на самом деле писал вопросы, по частым словам не проверить: вопрос и ответ — разные жанры речи."})
 
     # ---------- мир Гари (русские переводы): места, пантеон, полки ----------

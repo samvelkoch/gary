@@ -44,7 +44,7 @@ const wmGroupLabel = c => EX.wgroups[c].slice(0,2).join(' · ');
 const wmRising = (m,p) => p>=0 && wmCount(m,p)>=6 && wmRate(m,p)/Math.max(wmRate(m,-1),1e-9)>=1.5;
 const wmTop = (p,n=8) => WMD.filter(m=>wmRising(m,p)).sort((a,b)=>wmRate(b,p)/wmRate(b,-1)-wmRate(a,p)/wmRate(a,-1)).slice(0,n);
 const wmTerrOp = () => lum(css('--surface'))<0.2?.2:.34;
-$('#t-karta').textContent = `${WMD.length} самых частых слов русских переводов разложены на карте так, что рядом оказываются слова, которые стоят в похожем окружении (соседи — в пределах пяти значимых слов внутри абзаца, расстановка — t-SNE). Цветные области — группы близких слов. Выберите период или нажмите «Играть»: слова, которых в эти годы заметно больше, вырастут и покраснеют. Нажмите на слово, чтобы увидеть его ближайших соседей.`;
+$('#t-karta').textContent = `${pnr(WMD.length,['самое частое слово русских переводов разложено','самых частых слова русских переводов разложены','самых частых слов русских переводов разложены'])} на карте так, что рядом оказываются слова, которые стоят в похожем окружении (соседи — в пределах пяти значимых слов внутри абзаца, расстановка — t-SNE). Цветные области — группы близких слов. Выберите период или нажмите «Играть»: слова, которых в эти годы заметно больше, вырастут и покраснеют. Нажмите на слово, чтобы увидеть его ближайших соседей.`;
 function drawWmap(){
   const box=$('#c-wmap'); const Wd=box.clientWidth||800; const h=Wd<600?Math.round(Wd*1.3):Math.round(Math.min(720,Math.max(460,Wd*0.66))); const [s,w]=svg(box,h);
   const xs=WMD.map(m=>m.x), ys=WMD.map(m=>m.y); const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
@@ -81,7 +81,7 @@ function wmApply(){
     if(!it.show&&forced){ it.show=true; } });
   items.forEach(it=>{ const m=it.o.m; const dim=(WM.group>=0&&m.c!==WM.group)||(focus&&m.k!==focus&&!nb.has(m.k));
     const isF=m.k===focus, isN=nb.has(m.k);
-    const tip=`${esc(m.w)}<br>${fmt(it.cnt)} ${plural(it.cnt,'раз','раза','раз')}${p>=0?', '+PER[p]:''}<br>нажмите, чтобы увидеть близкие слова`;
+    const tip=`${esc(m.w)}<br>${fmt(it.cnt)} ${plural(it.cnt, ['раз', 'раза', 'раз'])}${p>=0?', '+PER[p]:''}<br>нажмите, чтобы увидеть близкие слова`;
     const ink=isF||isN||it.rise?'--mark':(dim?'--muted':'--ink');
     it.o.t.setAttribute('data-tip',tip); it.o.c.setAttribute('data-tip',tip);
     it.o.t.setAttribute('y',(it.o.Y+it.dy).toFixed(1));
@@ -103,7 +103,7 @@ function wmApply(){
 function wmReadout(){ const host=$('#wm-read'); const p=WM.per, k=WM.sel;
   const link=kk=>`<button type="button" class="chip" data-wk="${esc(kk)}">${esc(kk)}</button>`; let html;
   if(k){ const m=WMK[k]; const nbs=(EX.neighbors[k]||[]).filter(x=>WMK[x]);
-    html=`<b>${esc(m.w)}</b> — ${fmt(wmCount(m,-1))} ${plural(wmCount(m,-1),'раз','раза','раз')}; по периодам: ${PER.map((pp,i)=>`${pp}: ${fmt(wmCount(m,i))}`).join(', ')}.<br>Близкие по употреблению (линии на карте): ${nbs.map(link).join(' ')||'—'} <button type="button" class="btn" data-open="${esc(k)}">Открыть в словоискателе →</button>`;
+    html=`<b>${esc(m.w)}</b> — ${fmt(wmCount(m,-1))} ${plural(wmCount(m,-1), ['раз', 'раза', 'раз'])}; по периодам: ${PER.map((pp,i)=>`${pp}: ${fmt(wmCount(m,i))}`).join(', ')}.<br>Близкие по употреблению (линии на карте): ${nbs.map(link).join(' ')||'—'} <button type="button" class="btn" data-open="${esc(k)}">Открыть в словоискателе →</button>`;
   } else if(p>=0){ const top=wmTop(p);
     html=`<b>${esc(PER[p])}</b> (${esc(D.per_note[p])}). Красным — слова, которых в эти годы заметно больше, чем в среднем (не реже чем в 1,5 раза и не меньше 6 употреблений): ${top.map(m=>link(m.k)).join(' ')||'—'}`;
   } else html=`Размер слова — как часто оно встречается; цветная область — группа слов в похожем окружении. Выберите период или нажмите «Играть», чтобы увидеть, как менялся словарь.`;
@@ -126,7 +126,7 @@ const FNm = D.fields.names;
 const thChg = f => { const a=D.fields.per.map(r=>r[f]); const pr=mean(a.slice(0,NPER-1)); return pr>0 ? a[NPER-1]/pr-1 : null; };
 function thPick(i, scroll){ const f=FNm[i]; const host=$('#th-card'); const per=D.fields.per.map(r=>r[f]); const sg=D.fields.sign;
   const words=D.fields.words[f].filter(x=>x[1]>0); const loud=EX.theme_loud[f]||[]; const c=thChg(f);
-  entityCard(host,{eyebrow:'Тема',title:f,meta:`${words.length} ${plural(words.length,'слово','слова','слов')} темы встречаются в переводах`,
+  entityCard(host,{eyebrow:'Тема',title:f,meta:`${words.length} ${plural(words.length, ['слово', 'слова', 'слов'])} темы встречаются в переводах`,
     tiles:[[fmt1(per[NPER-1]),`на 1000 слов, ${PER[NPER-1]}`],[c==null?'—':sgnPct(c),'поздний период к среднему прежних'],[`${fmt1(sg['Ажар'][f])} / ${fmt1(sg['Гари'][f])}`,'на 1000 слов: Ажар / Гари']],
     sparks:`<h4>По периодам, на 1000 слов</h4>${sparkSVG(per,{tips:per.map((v,j)=>`${PER[j]}: ${fmt1(v)} на 1000 слов`)})}`,
     body:`<h4>Слова темы — нажмите, чтобы открыть в словоискателе</h4><div class="chips">${words.slice(0,16).map(([w,n])=>hasWord(w)?`<button type="button" class="chip" data-w="${esc(w)}">${esc(w)} · ${fmt(n)}</button>`:`<span class="chip static">${esc(w)} · ${fmt(n)}</span>`).join('')}</div>
@@ -145,7 +145,7 @@ const PAL = EX.palette;
   $('#f-cveta').textContent=`Главные цвета Гари во все периоды — белый и чёрный: вместе ${fmt(Math.round(100*mean(PAL.map((_,i)=>bw(i)))))}% цветовых слов в среднем по периодам. Сильнее всего к концу выросла доля цвета «${up.nm}» (${fmt1(100*up.last)}% в ${PER[NPER-1]} против ${fmt1(100*up.prev)}% в среднем раньше), сильнее всего упала — «${dn.nm}» (${fmt1(100*dn.last)}% против ${fmt1(100*dn.prev)}%).`; })();
 chart(()=>{ const box=$('#c-palette'); const rowH=44; const h=PAL.length*rowH+8; const [s,w]=svg(box,h); const ring=css('--ring'); const lw=w<560?78:96;
   PAL.forEach((r,i)=>{ const y=i*rowH+4; const tot=sum(r.c.map(c=>c[2]))||1; let x=lw; const Wd=w-lw-4;
-    txt(s,lw-10,y+17,r.p,{'text-anchor':'end',style:'fill:var(--ink);font-size:12px'}); txt(s,lw-10,y+31,`${fmt(tot)} ${plural(tot,'слово','слова','слов')}`,{'text-anchor':'end',style:'fill:var(--muted);font-size:10.5px'});
+    txt(s,lw-10,y+17,r.p,{'text-anchor':'end',style:'fill:var(--ink);font-size:12px'}); txt(s,lw-10,y+31,`${fmt(tot)} ${plural(tot, ['слово', 'слова', 'слов'])}`,{'text-anchor':'end',style:'fill:var(--muted);font-size:10.5px'});
     r.c.forEach(([name,hex,n])=>{ const ww=Wd*n/tot; if(ww<0.5) return; const k=hasWord(name);
       const rc=el('rect',{x:x+.5,y,width:Math.max(.5,ww-1),height:rowH-10,fill:hex,stroke:ring,'stroke-width':.8,class:k?'clickable':'','data-tip':`${PER[i]} · ${esc(name)}: ${n} (${fmt1(100*n/tot)}%)${k?'<br>нажмите — слово в словоискателе':''}`},s);
       if(k) rc.addEventListener('click',()=>openW(name));
@@ -159,8 +159,8 @@ const TXP = PER.map(p=>RU_OWN.filter(a=>a.year&&a.year>=+p.slice(0,4)&&a.year<=+
 const ntCount = n => NT.per>=0 ? n.per[NT.per] : n.n;
 const clCol = c => c<0 ? css('--neutral-bar') : css('--g'+(c+1));
 (function(){ const top=NN.slice().sort((a,b)=>b.n-a.n); const E=NE.slice().sort((a,b)=>b[2]-a[2])[0]; const big=NC.slice().sort((a,b)=>b.n-a.n)[0];
-  $('#t-net').textContent=`Люди, которых Гари называет хотя бы в ${NETD.min_books} книгах: исторические лица, писатели, художники, герои мифов и книг — ${NN.length} ${plural(NN.length,'имя','имени','имён')}. Размер кружка — в скольких книгах назван человек; линия — два имени встречаются в одном абзаце; цвет — круг имён, которые чаще стоят рядом. Выберите период или круг, найдите имя — откроется карточка с цитатами.`;
-  $('#f-krug').textContent=`Чаще всех у Гари назван ${top[0].name} — в ${top[0].n} ${plural(top[0].n,'книге','книгах','книгах')} из ${RU_OWN.length}; за ним ${top.slice(1,6).map(r=>`${r.name} (${r.n})`).join(', ')}. Имена складываются в ${NC.length} ${plural(NC.length,'круг','круга','кругов')}; самый большой — ${big.names.join(', ')} и ещё ${big.n-big.names.length}. Чаще всего рядом стоят ${NN[E[0]].name} и ${NN[E[1]].name}: в ${E[2]} ${plural(E[2],'абзаце','абзацах','абзацах')}.`; })();
+  $('#t-net').textContent=`Люди, которых Гари называет хотя бы в ${NETD.min_books} ${plural(NETD.min_books,['книге','книгах'])}: исторические лица, писатели, художники, герои мифов и книг — ${NN.length} ${plural(NN.length, ['имя', 'имени', 'имён'])}. Размер кружка — в скольких книгах назван человек; линия — два имени встречаются в одном абзаце; цвет — круг имён, которые чаще стоят рядом. Выберите период или круг, найдите имя — откроется карточка с цитатами.`;
+  $('#f-krug').textContent=`Чаще всех у Гари назван ${top[0].name} — в ${top[0].n} ${plural(top[0].n, ['книге', 'книгах', 'книгах'])} из ${RU_OWN.length}; за ним ${top.slice(1,6).map(r=>`${r.name} (${r.n})`).join(', ')}. Имена складываются в ${NC.length} ${plural(NC.length, ['круг', 'круга', 'кругов'])}; самый большой — ${big.names.join(', ')} и ещё ${big.n-big.names.length}. Чаще всего рядом стоят ${NN[E[0]].name} и ${NN[E[1]].name}: в ${E[2]} ${plural(E[2], ['абзаце', 'абзацах', 'абзацах'])}.`; })();
 function ntPer(i){ NT.per=i; ntApply(); }
 periodBtns($('#pp-per'),NT.per,ntPer);
 (function(){ const g=$('#pp-clusters'); const mk=(i,l)=>{ const b=document.createElement('button'); b.type='button'; b.className='chip'; b.setAttribute('aria-pressed',String(i===NT.cl));
@@ -192,7 +192,7 @@ function ntApply(){
       const r=on?3.5+10*Math.sqrt(cnt[i]/mx):3; o.r=r;
       o.c.setAttribute('r',r.toFixed(1)); o.c.setAttribute('fill',clCol(o.n.cl)); o.c.setAttribute('stroke-width',i===NT.sel?3:1.5);
       o.c.style.opacity=on?(dim?.18:.92):.1; o.c.style.stroke=i===foc?css('--ink'):css('--surface');
-      o.c.setAttribute('data-tip',`<b>${esc(o.n.name)}</b><br>${NT.per>=0?PER[NT.per]+': ':''}в ${cnt[i]} ${plural(cnt[i],'книге','книгах','книгах')}${NT.per>=0?'':', '+o.n.np+' '+plural(o.n.np,'абзац','абзаца','абзацев')}<br>нажмите, чтобы открыть карточку`); });
+      o.c.setAttribute('data-tip',`<b>${esc(o.n.name)}</b><br>${NT.per>=0?PER[NT.per]+': ':''}в ${cnt[i]} ${plural(cnt[i], ['книге', 'книгах', 'книгах'])}${NT.per>=0?'':', '+o.n.np+' '+plural(o.n.np, ['абзац', 'абзаца', 'абзацев'])}<br>нажмите, чтобы открыть карточку`); });
     order.forEach(i=>{ const o=nodes[i]; const on=cnt[i]>0&&(NT.cl<0||o.n.cl===NT.cl); const forced=i===foc||nb.has(i);
       const fs=12, bw=o.n.name.length*fs*0.56+6, bx={x:o.X-bw/2,y:o.Y-o.r-fs-4,w:bw,h:fs+3}; const show=on&&(forced||fit(bx));
       if(show) placed.push(bx); o.t.setAttribute('y',(o.Y-o.r-4).toFixed(1)); o.t.style.opacity=show?((foc!=null&&!forced)?.25:1):0; o.t.style.fontWeight=i===foc?'700':'400'; });
@@ -210,8 +210,8 @@ function ntCard(){
   const rates=n.per.map((v,i)=>TXP[i]?100*v/TXP[i]:0); const peak=rates.indexOf(Math.max(...rates));
   const ys=n.books.map(([b])=>A[b].year).filter(Boolean); const yrs=ys.length?(Math.min(...ys)===Math.max(...ys)?String(ys[0]):`${Math.min(...ys)}–${Math.max(...ys)}`):'—';
   entityCard(host,{eyebrow:'Круг Гари',title:n.name,meta:`круг: ${esc(n.cl>=0?NC[n.cl].names.join(' · '):'вне кругов')} · чаще всего в ${PER[peak]}`,
-    tiles:[[fmt(n.n),plural(n.n,'книга','книги','книг')],[fmt(n.np),plural(n.np,'абзац','абзаца','абзацев')],[yrs,'годы книг']],
-    sparks:`<h4>Доля книг периода, где назван, %</h4>${sparkSVG(rates,{unit:'%',dec:0,tips:rates.map((v,i)=>`${PER[i]}: ${n.per[i]} из ${TXP[i]} книг`)})}`,
+    tiles:[[fmt(n.n),plural(n.n, ['книга', 'книги', 'книг'])],[fmt(n.np),plural(n.np, ['абзац', 'абзаца', 'абзацев'])],[yrs,'годы книг']],
+    sparks:`<h4>Доля книг периода, где назван, %</h4>${sparkSVG(rates,{unit:'%',dec:0,tips:rates.map((v,i)=>`${PER[i]}: ${n.per[i]} из ${TXP[i]} ${plural(TXP[i],['книги','книг'])}`)})}`,
     chips:nbs,chipsTitle:'Чаще всего рядом (общих абзацев)',
     body:`<h4>В каких книгах (абзацев с именем)</h4><div class="mini3"><span class="h" style="text-align:left">книга</span><span class="h">год</span><span class="h">абзацев</span>${n.books.map(([b,k])=>`<span>${bookBtn(b)}</span><span class="n">${A[b].year||'—'}</span><span class="n">${k}</span>`).join('')}</div>
       <h4>Из текстов</h4>${(n.ctx||[]).map(c=>`<blockquote>${hiWord(c.s,n.name)}<cite>${bookBtn(c.b)}, ${A[c.b].year||''}</cite></blockquote>`).join('')}${hasWord(n.name)?`<p><button type="button" class="btn" data-w="${esc(n.name)}">Открыть в словоискателе →</button></p>`:''}`}); }
@@ -226,7 +226,7 @@ chart(drawNet,$('#c-net'));
 function yearCard(y,scroll){ const host=$('#yr-card'); const L=D.works.filter(w=>w.year===y);
   const ev=EVENTS.filter(e=>e[0]===y).map(e=>e[1]); const ruW=sum(L.filter(w=>w.ru!=null).map(w=>A[w.ru].words));
   entityCard(host,{eyebrow:'Год',title:String(y),meta:ev.length?esc(ev.join('; ')):'по году первой публикации',
-    tiles:[[fmt(L.length),plural(L.length,'произведение','произведения','произведений')],[fmt(L.filter(w=>w.fr!=null).length),'есть во французском оригинале'],[fmt(ruW),'слов в переводах']],
+    tiles:[[fmt(L.length),plural(L.length, ['произведение', 'произведения', 'произведений'])],[fmt(L.filter(w=>w.fr!=null).length),'есть во французском оригинале'],[fmt(ruW),plural(ruW,['слово в переводах','слова в переводах','слов в переводах'])]],
     body:L.length?`<h4>Произведения года — нажмите, чтобы открыть в атласе</h4><div class="mini3"><span class="h" style="text-align:left">книга</span><span class="h">подпись</span><span class="h">слов</span>${L.map(w=>{ const b=w.ru!=null?w.ru:w.fr; return `<span>${bookBtn(b)}${w.ru==null?' <span class="muted">фр.</span>':''}</span><span class="n">${esc(SIGN[w.sign]||'')}</span><span class="n">${fmt(A[b].words)}</span>`; }).join('')}</div>`:'<p class="note">В корпусе нет произведений этого года.</p>'});
   if(scroll) nearScroll(host); }
 yearCard(1975,false);
@@ -244,7 +244,7 @@ function cmpRender(){ const host=$('#cmp-list'); host.innerHTML='';
   if(!CMP.length){ host.innerHTML='<p class="note">Добавьте книги из списка или кнопкой «+ в „Строение рядом“» в карточке атласа.</p>'; return; }
   const cw=host.clientWidth||600; const mxs=250;
   CMP.slice().sort((x,y)=>(A[x].year||0)-(A[y].year||0)).forEach(i=>{ const a=A[i]; const row=document.createElement('div'); row.className='cmp-row';
-    row.innerHTML=`<div class="h"><b>${bookBtn(i)}</b><span>${a.year||'—'} · ${esc(SIGN[a.sign]||'')} · ${fmt(a.words)} ${plural(a.words,'слово','слова','слов')} · ${fmt(a.paras)} ${plural(a.paras,'абзац','абзаца','абзацев')} · диалог ${fmt1(a.dlg)}% · фраза ${fmt1(a.sl_med)} слов</span><button type="button" class="x" data-x="${i}" aria-label="убрать из сравнения" data-tip="убрать">✕</button></div>`;
+    row.innerHTML=`<div class="h"><b>${bookBtn(i)}</b><span>${a.year||'—'} · ${esc(SIGN[a.sign]||'')} · ${fmt(a.words)} ${plural(a.words, ['слово', 'слова', 'слов'])} · ${fmt(a.paras)} ${plural(a.paras, ['абзац', 'абзаца', 'абзацев'])} · диалог ${fmt1(a.dlg)}% · фраза ${pn(a.sl_med,['слово','слова','слов'],1)}</span><button type="button" class="x" data-x="${i}" aria-label="убрать из сравнения" data-tip="убрать">✕</button></div>`;
     host.appendChild(row); cmpCanvas(row,a,cw,mxs); bindLinks(row);
     row.querySelector('[data-x]').addEventListener('click',()=>{ CMP.splice(CMP.indexOf(i),1); cmpRender(); }); }); }
 (function(){ const pick=w=>A.findIndex(a=>a.work===w&&a.lang==='ru'&&a.role==='own');
@@ -254,7 +254,7 @@ function cmpRender(){ const host=$('#cmp-list'); host.innerHTML='';
 
 /* ================= методика: новые разделы ================= */
 $('#method').insertAdjacentHTML('beforeend',[
-  `<b>Карта словаря</b> — ${WMD.length} самых частых слов русских переводов (без имён и служебных слов); окружение — соседи в пределах пяти значимых слов (существительные, прилагательные, глаголы) внутри абзаца, PPMI, сжатие до 100 измерений, расстановка t-SNE, ${EX.wgroups.length} групп k-средних. «Заметно больше в периоде» — не реже чем в 1,5 раза, чем в среднем, и не меньше 6 раз.`,
-  `<b>Круг Гари</b> — имена, названные хотя бы в ${NETD.min_books} книгах (${NN.length} самых частых по числу книг). Связь — два имени в одном абзаце; круги — спектральная кластеризация, раскладка «островами» (как в «Бродском на просвет»). Исключены отдельные личные имена, места, названия и частицы через дефис; склеены написания («Голля» → «де Голль», «Рембрандта» → «Рембрандт» и т. п.) — полный список в <code>analysis/explore.py</code>.`,
+  `<b>Карта словаря</b> — ${pnr(WMD.length,['самое частое слово русских переводов','самых частых слова русских переводов','самых частых слов русских переводов'])} (без имён и служебных слов); окружение — соседи в пределах пяти значимых слов (существительные, прилагательные, глаголы) внутри абзаца, PPMI, сжатие до 100 измерений, расстановка t-SNE, ${pnr(EX.wgroups.length,['группа','группы','групп'])} k-средних. «Заметно больше в периоде» — не реже чем в 1,5 раза, чем в среднем, и не меньше 6 раз.`,
+  `<b>Круг Гари</b> — имена, названные хотя бы в ${NETD.min_books} ${plural(NETD.min_books,['книге','книгах'])} (${NN.length} самых частых по числу книг). Связь — два имени в одном абзаце; круги — спектральная кластеризация, раскладка «островами» (как в «Бродском на просвет»). Исключены отдельные личные имена, места, названия и частицы через дефис; склеены написания («Голля» → «де Голль», «Рембрандта» → «Рембрандт» и т. п.) — полный список в <code>analysis/explore.py</code>.`,
   `<b>Цвета</b> — цветовые слова по заданному списку (в текстах нашлось ${new Set(PAL.flatMap(r=>r.c.map(c=>c[0]))).size}), только со строчной буквы (иначе «Белый» — фамилия); ширина отрезка — доля слова среди цветовых слов периода.`
 ].map(x=>`<li>${x}</li>`).join(''));
