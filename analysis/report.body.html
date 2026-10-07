@@ -53,14 +53,19 @@
 <div class="bar"><div class="inner"><div class="brand">Ромен Гари<i>_</i> на просвет</div><nav class="tabs" aria-label="Части"><button type="button" data-part="part-obzor" aria-current="true"><small>I</small>Обзор</button><button type="button" data-part="part-proza" aria-current="false"><small>II</small>Проза</button><button type="button" data-part="part-slova" aria-current="false"><small>III</small>Слова</button><button type="button" data-part="part-golosa" aria-current="false"><small>IV</small>Голоса</button><button type="button" data-part="part-mir" aria-current="false"><small>V</small>Мир Гари</button><button type="button" data-part="part-perevod" aria-current="false"><small>VI</small>Оригинал и перевод</button><button type="button" data-part="part-konec" aria-current="false"><small>VII</small>Рекорды и методика</button></nav></div></div>
 <header class="hero" id="top">
   <div class="inner">
-    <div class="eyebrow">Романы, рассказы и интервью, 1937–1980 · частотный и стилевой анализ</div>
-    <h1><span class="typed">Ромен Гари</span><span class="hand">на просвет</span></h1>
-    <p class="lede" id="lede"></p>
-    <div class="tools">
-      <label for="hl-input">Подсветить слово в книгах</label>
-      <input type="search" id="hl-input" placeholder="например, слон" autocomplete="off" spellcheck="false">
-      <div class="chips" id="hl-chips"></div>
-      <span class="count" id="hl-count" aria-live="polite"></span>
+    <div class="hero-grid">
+      <div class="hero-text">
+        <div class="eyebrow">Романы, рассказы и интервью, 1937–1980 · частотный и стилевой анализ</div>
+        <h1><span class="typed">Ромен Гари</span><span class="hand">на просвет</span></h1>
+        <p class="lede" id="lede"></p>
+        <div class="tools">
+          <label for="hl-input">Подсветить слово в книгах</label>
+          <input type="search" id="hl-input" placeholder="например, слон" autocomplete="off" spellcheck="false">
+          <div class="chips" id="hl-chips"></div>
+          <span class="count" id="hl-count" aria-live="polite"></span>
+        </div>
+      </div>
+      {{PORTRAIT}}
     </div>
     <div class="sheets" id="sheets"><canvas id="sheets-cv" role="img" aria-label="Все книги Гари в русском переводе и во французском оригинале по годам: каждая книга изображена листом, каждый абзац — штрихом длиной в число слов"></canvas></div>
     <div class="legend-h" id="sheets-legend"></div>
@@ -68,6 +73,7 @@
     <div class="figures" id="figures"></div>
   </div>
 </header>
+{{PORTRAIT_JS}}
 <div class="inner"><div class="layout">
 <nav class="rail" aria-label="Разделы"><div class="g">I · Обзор</div><a href="#glavnoe"><span>I.1</span>Главное коротко</a><a href="#mify"><span>I.2</span>Мифы и факты</a><a href="#hronologia"><span>I.3</span>Хронология</a><div class="g">II · Проза</div><a href="#fraza"><span>II.1</span>Фраза</a><a href="#dialog"><span>II.2</span>Диалог</a><a href="#ya"><span>II.3</span>Кто рассказывает</a><a href="#znaki"><span>II.4</span>Знаки</a><a href="#atlas"><span>II.5</span>Атлас книг</a><div class="g">III · Слова</div><a href="#slovar"><span>III.1</span>Частые слова</a><a href="#poisk"><span>III.2</span>Словоискатель</a><a href="#karta"><span>III.3</span>Карта словаря</a><a href="#epohi"><span>III.4</span>Слова эпох</a><a href="#temy"><span>III.5</span>Темы</a><a href="#gari-azhar"><span>III.6</span>Словарь Ажара</a><a href="#cveta"><span>III.7</span>Цвета</a><div class="g">IV · Голоса</div><a href="#golosa"><span>IV.1</span>Гари, Ажар, Синибальди</a><a href="#shum"><span>IV.2</span>Голос или переводчик</a><a href="#noch"><span>IV.3</span>«Ночь будет спокойной»</a><a href="#ustno"><span>IV.4</span>Гари вслух</a><div class="g">V · Мир Гари</div><a href="#panteon"><span>V.1</span>Пантеон</a><a href="#krug"><span>V.2</span>Круг Гари</a><a href="#mesta"><span>V.3</span>Места</a><a href="#zveri"><span>V.4</span>Звери</a><a href="#polki"><span>V.5</span>Напитки, транспорт, оружие</a><div class="g">VI · Оригинал и перевод</div><a href="#original"><span>VI.1</span>Три книги на двух языках</a><a href="#dva"><span>VI.2</span>Два перевода одной книги</a><div class="g">VII · Рекорды и методика</div><a href="#rekordy"><span>VII.1</span>Рекорды</a><a href="#korpus"><span>VII.2</span>Корпус</a><a href="#metod"><span>VII.3</span>Методика</a></nav>
 <div class="content">
@@ -88,6 +94,7 @@
 <section id="hronologia">
   <div class="kick"><b>I.3</b><span>Обзор</span></div>
   <h2>Хронология <span class="tag">интерактив</span></h2>
+  {{BIO_CARD}}
   <p id="t-chrono"></p>
   <div class="panel"><div class="cap"><span class="t">Книги по годам первой публикации</span><span class="u">высота — число слов в русском переводе или во французском оригинале</span></div>
     <div class="legend" id="lg-chrono"></div>

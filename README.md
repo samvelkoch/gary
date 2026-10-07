@@ -42,6 +42,7 @@
 | 4. Голоса: дельта Барроуза | `analysis/voices.py` | `analysis/voices.json` |
 | 5. Меры прозы, слова, темы, мир, мифы | `analysis/compute.py` | `analysis/stats.json` |
 | 6. Отчёт | `analysis/build_report.py` (`report.head.html`, `report.body.html`, `report.lib.js`, `report.app.js`, `report.chrome.js`) | `docs/prosvet.html` |
+| 7. Живой портрет на первом экране и биография в «Хронологии» | `analysis/live_portrait/`: `portrait_block.py` (разметка, подставляется `build_report.py` вместо `{{PORTRAIT}}`, `{{PORTRAIT_JS}}`, `{{BIO_CARD}}`), `portrait.js` (поведение), `sync_assets.py` (`bio` — подпись и биография из naprosvet/gary-live; `final` — ролик и постер; `deploy` — ролик рядом со страницами); `analysis/wrap_site.py` — обёртка сайта | `docs/portrait.mp4`, `docs/portrait.webm` рядом с `docs/prosvet.html`; постер встроен в страницу (`live_portrait/final/portrait-poster.webp` в git, ролик в `.gitignore`). Без `final/` `build_report.py` падает |
 
 ## Запуск
 

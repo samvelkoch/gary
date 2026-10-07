@@ -26,3 +26,8 @@ analysis/.venv*/
 .DS_Store
 !requirements*.txt
 !analysis/requirements*.txt
+
+# ── живой портрет: в git только постер; ролик лежит рядом со страницей (docs/portrait.*) и копируется из naprosvet/gary-live ──
+analysis/live_portrait/final/*.mp4
+analysis/live_portrait/final/*.webm
+analysis/live_portrait/final/*.jpg

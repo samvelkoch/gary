@@ -1,14 +1,20 @@
 """Собирает самодостаточный HTML «Ромен Гари на просвет»: оформление (report.head.html, как у «Бродского на просвет»),
 разметка (report.body.html), данные (stats.json, voices.json, explore.json), ядро графиков (report.lib.js), отчёт (report.app.js),
-навигация (report.chrome.js), интерактив (report.ui.js). Запуск: python build_report.py [out.html]"""
+навигация (report.chrome.js), интерактив (report.ui.js), живой портрет (live_portrait/). Запуск: python build_report.py [out.html]"""
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent / "live_portrait"))
+import portrait_block as lp   # живой портрет и карточка биографии: live_portrait/ (без final/ сборка падает)
 
 HERE = Path(__file__).parent
 out = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE.parent / "docs" / "prosvet.html"
 safe = lambda s: s.replace("</", "<\\/")
 r = lambda n: (HERE / n).read_text(encoding="utf-8")
-page = (r("report.head.html") + "\n" + r("report.body.html") + "\n"
+body = (r("report.body.html").replace("{{PORTRAIT}}", lp.portrait_block(), 1).replace("{{PORTRAIT_JS}}", lp.portrait_js(), 1)
+        .replace("{{BIO_CARD}}", lp.bio_card(), 1))
+assert "{{" not in body, "в разметке остались неподставленные места"
+page = (r("report.head.html") + "\n" + body + "\n"
         + '<script type="application/json" id="data-stats">' + safe(r("stats.json")) + "</script>\n"
         + '<script type="application/json" id="data-voices">' + safe(r("voices.json")) + "</script>\n"
         + '<script type="application/json" id="data-explore">' + safe(r("explore.json")) + "</script>\n"
