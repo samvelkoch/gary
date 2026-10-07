@@ -1,7 +1,7 @@
 """Файлы «живого портрета» Гари: подпись, биография, финальный ролик.
 
     python sync_assets.py bio       # naprosvet/gary-live/{bio,signature} -> bio.json, signature.svg (лежат в репозитории)
-    python sync_assets.py final     # naprosvet/gary-live/out/final-4b -> final/ (постер в git, ролик в .gitignore); без полного набора падает
+    python sync_assets.py final     # naprosvet/gary-live/out/final-4c -> final/ (постер в git, ролик в .gitignore); без полного набора падает
     python sync_assets.py deploy    # final/portrait.{mp4,webm} -> docs/ и naprosvet-site/gary/ (рядом со страницами)
 
 Сборка (build_report.py) берёт постер и проверяет ролик только в final/; без него падает.
@@ -17,7 +17,7 @@ HERE = Path(__file__).parent
 REPO = HERE.parent.parent
 WORK = REPO.parent
 GL = WORK / "naprosvet" / "gary-live"
-SRC = GL / "out" / "final-4b"   # рисунок 4b по фото №4; до 2026-10-07 был final-v1b-1
+SRC = GL / "out" / "final-4c"   # рисунок 4b, кадр по центру, взгляд в камеру; раньше final-4b, final-v1b-1
 FINAL = HERE / "final"
 NEED = ["portrait.mp4", "portrait.webm", "portrait-poster.webp", "portrait-poster.jpg"]
 
