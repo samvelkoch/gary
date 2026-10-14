@@ -235,7 +235,7 @@ paras = dict(merged)
 books_of = {l: {di for di, _ in ps} for l, ps in paras.items()}
 def show(l):
     return disp[l]
-pool = sorted([l for l in paras if len(books_of[l]) >= 3], key=lambda l: (-len(books_of[l]), -len(paras[l])))[:120]
+pool = sorted([l for l in paras if len(books_of[l]) >= 1], key=lambda l: (-len(books_of[l]), -len(paras[l])))[:220]
 N = len(pool)
 Wm = np.zeros((N, N)); blk = defaultdict(set)
 for i, l in enumerate(pool):
@@ -287,7 +287,7 @@ clusters = []
 for c in range(len(top_cl)):
     mem = sorted((i for i in range(N) if cl[i] == c), key=lambda i: -tx[i])
     clusters.append({"names": [nodes[i]["name"] for i in mem[:3]], "n": len(mem)})
-OUT["net"] = {"nodes": nodes, "edges": edges, "clusters": clusters, "min_books": 3}
+OUT["net"] = {"nodes": nodes, "edges": edges, "clusters": clusters, "min_books": 1}
 
 # ------------------------------------------------------------------ 4. темы: книги, где тема громче всего
 F = S["fields"]
