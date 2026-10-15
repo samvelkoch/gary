@@ -3,6 +3,7 @@
 build_report.py подставляет их в report.body.html вместо {{PORTRAIT}}, {{PORTRAIT_JS}}, {{BIO_CARD}}.
 Читает только то, что лежит в репозитории:
   signature.svg  — подпись (скан автографа, векторизован);
+  metrika-1914.webp, podpisi.svg — метрическая запись о рождении и подписи разными именами (архив автора проекта);
   bio.json       — биография, строка дат и строка источника (из naprosvet/gary-live/bio, обновляется `sync_assets.py bio`);
   final/         — финальный постер и ролик (кладёт `sync_assets.py final`).
 Стили — в report.head.html (правила .lp*, .bio*), поведение — portrait.js.
@@ -61,8 +62,22 @@ def portrait_js():
     return "<script>\n" + (HERE / "portrait.js").read_text(encoding="utf-8") + "</script>"
 
 
+def kacev_figures():
+    """Метрика 1914 года и подписи разными именами: врезка после первого абзаца биографии."""
+    img = "data:image/webp;base64," + base64.b64encode((HERE / "metrika-1914.webp").read_bytes()).decode("ascii")
+    svg = (HERE / "podpisi.svg").read_text(encoding="utf-8")
+    svg = svg.replace("<svg ", '<svg class="bio-sig" role="img" aria-label="Подписи Гари разными именами" ', 1)
+    return f'''    <div class="bio-figs">
+      <figure><img src="{img}" width="1200" height="898" loading="lazy" alt="Метрическая книга, Вильна, 1914: запись о рождении сына Романа">
+        <figcaption>Вильна, май 1914, метрическая книга: «Сын Роман». Отец — Лейба Кацев, мать — Мина Иосселевна.</figcaption></figure>
+      <figure>{svg}
+        <figcaption>Одна рука, разные имена: Romain Gary, Émile Ajar и по-русски «Роман Кацев».</figcaption></figure>
+    </div>'''
+
+
 def bio_card():
-    paras = "\n".join(f"    <p>{html.escape(t, quote=False)}</p>" for t in BIO["paragraphs"])
+    ps = [f"    <p>{html.escape(t, quote=False)}</p>" for t in BIO["paragraphs"]]
+    paras = "\n".join(ps[:1] + [kacev_figures()] + ps[1:])
     return f'''<aside class="bio" aria-labelledby="bio-t">
     <div class="bio-k">{KICKER}</div>
     <h3 class="bio-t" id="bio-t">{TITLE}</h3>
